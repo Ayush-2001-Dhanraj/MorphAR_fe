@@ -1,0 +1,20 @@
+:root {
+  --primary-color: #90CAF9;
+  --secondary-color: #FFEE58;
+  --accent-color: #81C784;
+  --text-color: #E0E0E0;
+  --background-color: #303030;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-color);
+}
