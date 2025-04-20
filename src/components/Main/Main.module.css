@@ -1,3 +1,33 @@
 .main {
-    flex: 1
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: "100%";
+}
+
+.gradient_txt {
+    background: linear-gradient(74deg,
+            #4285f4 0,
+            #4285f4 9%,
+            #4285f4 20%,
+            #9b72cb 24%,
+            #9b72cb 35%,
+            #9b72cb 44%,
+            #9b72cb 50%,
+            #d96570 56%,
+            #d96570 75%,
+            #d96570 100%);
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
+.avatar_placeholder {
+    width: 30px;
+    height: 30px;
+    background-color: #ddd;
+    border-radius: 50%;
 }

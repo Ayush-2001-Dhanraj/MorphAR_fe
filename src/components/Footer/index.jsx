@@ -8,7 +8,7 @@ function Footer() {
   return (
     <Box className={styles.footer}>
       <IconButton
-        sx={{ color: "var(--accent-color)" }}
+        sx={{ color: "var(--secondary-color)" }}
         component="a"
         href="mailto:dhanrajaayush123@gmail.com"
         target="_blank"
@@ -28,7 +28,7 @@ function Footer() {
         </Link>
       </Typography>
       <IconButton
-        sx={{ color: "var(--accent-color)" }}
+        sx={{ color: "var(--secondary-color)" }}
         component="a"
         href="https://github.com/Ayush-2001-Dhanraj"
         target="_blank"
