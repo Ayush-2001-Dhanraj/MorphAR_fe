@@ -9,9 +9,6 @@ async function get_gen_text(history, prompt) {
   const response = await chat.sendMessage({
     message: prompt,
   });
-
-  console.log("Chat response :", response.text);
-  return response.text;
 }
 
 export default get_gen_text;

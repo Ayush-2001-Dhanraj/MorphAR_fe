@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./Main.module.css";
 import {
   Box,
@@ -25,19 +25,141 @@ const DrawerHeader = styled("Box")(({ theme }) => ({
 function Main() {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const bottomRef = useRef(null);
+  const containerRef = useRef(null);
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
   };
 
   const handleSend = async () => {
+    setLoading(true);
     const currentHistory = [...history];
-    const response = await models.text(currentHistory, input);
+    await models.text(currentHistory, input);
     setHistory([...currentHistory]);
+    setLoading(false);
+    setInput("");
+  };
+
+  const scrollToBottom = () => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const start = container.scrollTop;
+    const end = container.scrollHeight - container.clientHeight;
+    const duration = 400;
+    const startTime = performance.now();
+
+    const animateScroll = (currentTime) => {
+      const timeElapsed = currentTime - startTime;
+      const progress = Math.min(timeElapsed / duration, 1);
+      const easeInOut = 0.5 * (1 - Math.cos(Math.PI * progress));
+
+      container.scrollTop = start + (end - start) * easeInOut;
+
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      }
+    };
+
+    requestAnimationFrame(animateScroll);
   };
 
   useEffect(() => {
-    console.log("history", history);
+    scrollToBottom();
+  }, [history, loading]);
+
+  const renderHistory = useMemo(() => {
+    return history.length === 0 ? (
+      <Typography variant="h4" align="center">
+        <span className={styles.gradient_txt}>Hello, Dev</span>
+      </Typography>
+    ) : (
+      history.map((entry, index) => (
+        <Box
+          key={index}
+          sx={{
+            alignSelf: entry.role === "user" ? "flex-end" : "flex-start",
+            background: "var(--primary-color)",
+            color:
+              entry.role === "user"
+                ? "var(--secondary-color)"
+                : "var(--text-color)",
+            borderRadius: 4,
+            maxWidth: "80%",
+            padding: 2,
+            paddingRight: 4,
+            paddingLeft: 4,
+          }}
+        >
+          <ReactMarkdown
+            children={entry.parts[0].text}
+            components={{
+              p: ({ node, ...props }) => (
+                <Typography
+                  variant="body1"
+                  sx={{
+                    lineHeight: 1.2,
+                    marginBottom: 2,
+                    "&:last-of-type": {
+                      marginBottom: 0,
+                    },
+                  }}
+                  {...props}
+                />
+              ),
+              h1: ({ children }) => (
+                <Typography variant="h4">{children}</Typography>
+              ),
+              h2: ({ children }) => (
+                <Typography variant="h5">{children}</Typography>
+              ),
+              h3: ({ children }) => (
+                <Typography variant="h6">{children}</Typography>
+              ),
+              ul: ({ children }) => (
+                <Box component="ul" sx={{ paddingLeft: 3, marginBottom: 2 }}>
+                  {children}
+                </Box>
+              ),
+              ol: ({ children }) => (
+                <Box component="ol" sx={{ paddingLeft: 3, marginBottom: 2 }}>
+                  {children}
+                </Box>
+              ),
+              li: ({ children }) => (
+                <li>
+                  <Typography variant="body2">{children}</Typography>
+                </li>
+              ),
+              strong: ({ children }) => <strong>{children}</strong>,
+              em: ({ children }) => <em>{children}</em>,
+              code: ({ children }) => (
+                <Box
+                  component="pre"
+                  sx={{
+                    backgroundColor: "var(--background-color)",
+                    color: "var(--text-color)",
+                    padding: 3,
+                    borderRadius: 2,
+                    fontSize: "0.95rem",
+                    overflowX: "auto",
+                    width: "100%",
+                    whiteSpace: "pre-wrap",
+                    marginTop: 2,
+                    marginBottom: 2,
+                  }}
+                >
+                  <code>{children}</code>
+                </Box>
+              ),
+            }}
+          />
+        </Box>
+      ))
+    );
   }, [history]);
 
   return (
@@ -51,6 +173,7 @@ function Main() {
 
       <Container
         maxWidth="md"
+        ref={containerRef}
         sx={{
           height: "calc(100vh - 180px)",
           overflowY: "auto",
@@ -60,100 +183,29 @@ function Main() {
           marginBottom: 2.5,
         }}
       >
-        {history.length === 0 ? (
-          <Typography variant="h4" align="center">
-            <span className={styles.gradient_txt}>Hello, Dev</span>
-          </Typography>
-        ) : (
-          history.map((entry, index) => (
-            <Box
-              key={index}
-              sx={{
-                alignSelf: entry.role === "user" ? "flex-end" : "flex-start",
-                background: "var(--primary-color)",
-                color:
-                  entry.role === "user"
-                    ? "var(--secondary-color)"
-                    : "var(--text-color)",
-                borderRadius: 4,
-                maxWidth: "80%",
-                padding: 2,
-                paddingRight: 4,
-                paddingLeft: 4,
-              }}
-            >
-              <ReactMarkdown
-                children={entry.parts[0].text}
-                components={{
-                  p: ({ node, ...props }) => (
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        lineHeight: 1.2,
-                        marginBottom: 2,
-                        "&:last-of-type": {
-                          marginBottom: 0,
-                        },
-                      }}
-                      {...props}
-                    />
-                  ),
-                  h1: ({ children }) => (
-                    <Typography variant="h4">{children}</Typography>
-                  ),
-                  h2: ({ children }) => (
-                    <Typography variant="h5">{children}</Typography>
-                  ),
-                  h3: ({ children }) => (
-                    <Typography variant="h6">{children}</Typography>
-                  ), // Add spacing below entire list
-                  ul: ({ children }) => (
-                    <Box
-                      component="ul"
-                      sx={{ paddingLeft: 3, marginBottom: 2 }}
-                    >
-                      {children}
-                    </Box>
-                  ),
-                  ol: ({ children }) => (
-                    <Box
-                      component="ol"
-                      sx={{ paddingLeft: 3, marginBottom: 2 }}
-                    >
-                      {children}
-                    </Box>
-                  ),
-                  li: ({ children }) => (
-                    <li>
-                      <Typography variant="body2">{children}</Typography>
-                    </li>
-                  ),
-                  strong: ({ children }) => <strong>{children}</strong>,
-                  em: ({ children }) => <em>{children}</em>,
-                  code: ({ children }) => (
-                    <Box
-                      component="pre"
-                      sx={{
-                        backgroundColor: "var(--background-color)",
-                        color: "var(--text-color)",
-                        padding: 3,
-                        borderRadius: 2,
-                        fontSize: "0.95rem",
-                        overflowX: "auto",
-                        width: "100%",
-                        whiteSpace: "pre-wrap",
-                        marginTop: 2,
-                        marginBottom: 2,
-                      }}
-                    >
-                      <code>{children}</code>
-                    </Box>
-                  ),
-                }}
-              />
-            </Box>
-          ))
+        {renderHistory}
+        {loading && (
+          <Box
+            sx={{
+              alignSelf: "flex-end",
+              background: "var(--primary-color)",
+              color: "var(--text-color)",
+              borderRadius: 4,
+              maxWidth: "80%",
+              padding: 2,
+              paddingRight: 4,
+              paddingLeft: 4,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <span className={styles.typing_dot}></span>
+            <span className={styles.typing_dot}></span>
+            <span className={styles.typing_dot}></span>
+          </Box>
         )}
+        <div ref={bottomRef} />
       </Container>
 
       <Container maxWidth="md">
@@ -174,6 +226,7 @@ function Main() {
             value={input}
             onChange={handleInputChange}
             fullWidth
+            disabled={loading}
             InputProps={{
               disableUnderline: true,
               sx: {
@@ -181,14 +234,22 @@ function Main() {
               },
             }}
           />
-          <IconButton>
-            <ImageIcon sx={{ color: "var(--secondary-color)" }} />
+          <IconButton disabled={loading}>
+            <MicIcon
+              sx={{ color: "var(--secondary-color)" }}
+              fontSize="small"
+            />
           </IconButton>
-          <IconButton>
-            <MicIcon sx={{ color: "var(--secondary-color)" }} />
-          </IconButton>
-          <IconButton onClick={handleSend}>
-            <SendIcon sx={{ color: "var(--secondary-color)" }} />
+          <IconButton onClick={handleSend} disabled={loading}>
+            <SendIcon
+              sx={{
+                color:
+                  input.trim().length && !loading
+                    ? "var(--text-color)"
+                    : "var(--secondary-color)",
+              }}
+              fontSize="small"
+            />
           </IconButton>
         </Box>
       </Container>
