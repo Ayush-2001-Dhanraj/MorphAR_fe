@@ -1,4 +1,4 @@
-import { Box, Modal, Typography, IconButton, TextField } from "@mui/material";
+import { Box, Modal, IconButton, TextField } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useVoiceToText } from "react-speakup";
 import DoneIcon from "@mui/icons-material/Done";
