@@ -8,11 +8,12 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import ImageIcon from "@mui/icons-material/Image";
 import MicIcon from "@mui/icons-material/Mic";
 import SendIcon from "@mui/icons-material/Send";
 import models from "../../models";
 import ReactMarkdown from "react-markdown";
+import Loader from "../Loading";
+import SpeechToText from "../SpeechToText";
 
 const DrawerHeader = styled("Box")(({ theme }) => ({
   display: "flex",
@@ -27,6 +28,15 @@ function Main() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [openSpeech, setOpenSpeech] = useState(false);
+
+  const handleCloseSpeech = () => setOpenSpeech(false);
+  const handleSaveTranscript = (transcript) => {
+    setInput(transcript);
+    handleCloseSpeech();
+    handleSend(transcript);
+  };
+
   const bottomRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -34,10 +44,13 @@ function Main() {
     setInput(e.target.value);
   };
 
-  const handleSend = async () => {
+  const handleSend = async (customInput = "") => {
+    const prompt = customInput || input; // <-- Use customInput if provided
+    console.log(prompt);
+    console.log(prompt);
     setLoading(true);
     const currentHistory = [...history];
-    await models.text(currentHistory, input);
+    await models.text(currentHistory, prompt);
     setHistory([...currentHistory]);
     setLoading(false);
     setInput("");
@@ -65,6 +78,10 @@ function Main() {
     };
 
     requestAnimationFrame(animateScroll);
+  };
+
+  const handleMicClick = () => {
+    setOpenSpeech((preV) => !preV);
   };
 
   useEffect(() => {
@@ -163,97 +180,86 @@ function Main() {
   }, [history]);
 
   return (
-    <Box className={styles.main} pr={2} pl={2}>
-      <DrawerHeader sx={{ justifyContent: "space-between" }}>
-        <Typography variant="h6" className={styles.gradient_txt}>
-          Ayush
-        </Typography>
-        <Box className={styles.avatar_placeholder}></Box>
-      </DrawerHeader>
+    <>
+      <Box className={styles.main} pr={2} pl={2}>
+        <DrawerHeader sx={{ justifyContent: "space-between" }}>
+          <Typography variant="h6" className={styles.gradient_txt}>
+            Ayush
+          </Typography>
+          <Box className={styles.avatar_placeholder}></Box>
+        </DrawerHeader>
 
-      <Container
-        maxWidth="md"
-        ref={containerRef}
-        sx={{
-          height: "calc(100vh - 180px)",
-          overflowY: "auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          marginBottom: 2.5,
-        }}
-      >
-        {renderHistory}
-        {loading && (
+        <Container
+          maxWidth="md"
+          ref={containerRef}
+          sx={{
+            height: "calc(100vh - 180px)",
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            marginBottom: 2.5,
+          }}
+        >
+          {renderHistory}
+
+          {loading && <Loader />}
+
+          <div ref={bottomRef} />
+        </Container>
+
+        <Container maxWidth="md">
           <Box
             sx={{
-              alignSelf: "flex-end",
-              background: "var(--primary-color)",
-              color: "var(--text-color)",
-              borderRadius: 4,
-              maxWidth: "80%",
-              padding: 2,
-              paddingRight: 4,
-              paddingLeft: 4,
+              backgroundColor: "var(--primary-color)",
               display: "flex",
+              justifyContent: "center",
               alignItems: "center",
+              borderRadius: 8,
               gap: 1,
             }}
+            pl={2}
+            pr={2}
           >
-            <span className={styles.typing_dot}></span>
-            <span className={styles.typing_dot}></span>
-            <span className={styles.typing_dot}></span>
-          </Box>
-        )}
-        <div ref={bottomRef} />
-      </Container>
-
-      <Container maxWidth="md">
-        <Box
-          sx={{
-            backgroundColor: "var(--primary-color)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 8,
-            gap: 1,
-          }}
-          pl={2}
-          pr={2}
-        >
-          <TextField
-            variant="standard"
-            value={input}
-            onChange={handleInputChange}
-            fullWidth
-            disabled={loading}
-            InputProps={{
-              disableUnderline: true,
-              sx: {
-                color: "var(--secondary-color)",
-              },
-            }}
-          />
-          <IconButton disabled={loading}>
-            <MicIcon
-              sx={{ color: "var(--secondary-color)" }}
-              fontSize="small"
-            />
-          </IconButton>
-          <IconButton onClick={handleSend} disabled={loading}>
-            <SendIcon
-              sx={{
-                color:
-                  input.trim().length && !loading
-                    ? "var(--text-color)"
-                    : "var(--secondary-color)",
+            <TextField
+              variant="standard"
+              value={input}
+              onChange={handleInputChange}
+              fullWidth
+              disabled={loading}
+              InputProps={{
+                disableUnderline: true,
+                sx: {
+                  color: "var(--secondary-color)",
+                },
               }}
-              fontSize="small"
             />
-          </IconButton>
-        </Box>
-      </Container>
-    </Box>
+            <IconButton disabled={loading} onClick={handleMicClick}>
+              <MicIcon
+                sx={{ color: "var(--secondary-color)" }}
+                fontSize="small"
+              />
+            </IconButton>
+            <IconButton onClick={() => handleSend()} disabled={loading}>
+              <SendIcon
+                sx={{
+                  color:
+                    input.trim().length && !loading
+                      ? "var(--text-color)"
+                      : "var(--secondary-color)",
+                }}
+                fontSize="small"
+              />
+            </IconButton>
+          </Box>
+        </Container>
+      </Box>
+      <SpeechToText
+        open={openSpeech}
+        handleClose={handleCloseSpeech}
+        save={handleSaveTranscript}
+      />
+    </>
   );
 }
 
