@@ -45,13 +45,13 @@ function Main() {
   };
 
   const handleSend = async (customInput = "") => {
-    const prompt = customInput || input; // <-- Use customInput if provided
-    console.log(prompt);
-    console.log(prompt);
+    const prompt = customInput || input;
+
     setLoading(true);
-    const currentHistory = [...history];
-    await models.text(currentHistory, prompt);
-    setHistory([...currentHistory]);
+
+    const response = await models.text(history, prompt);
+    setHistory([...history]);
+
     setLoading(false);
     setInput("");
   };
@@ -88,6 +88,10 @@ function Main() {
     scrollToBottom();
   }, [history, loading]);
 
+  useEffect(() => {
+    console.log("history", history);
+  }, [history]);
+
   const renderHistory = useMemo(() => {
     return history.length === 0 ? (
       <Typography variant="h4" align="center">
@@ -111,69 +115,77 @@ function Main() {
             paddingLeft: 4,
           }}
         >
-          <ReactMarkdown
-            children={entry.parts[0].text}
-            components={{
-              p: ({ node, ...props }) => (
-                <Typography
-                  variant="body1"
-                  sx={{
-                    lineHeight: 1.2,
-                    marginBottom: 2,
-                    "&:last-of-type": {
-                      marginBottom: 0,
-                    },
-                  }}
-                  {...props}
-                />
-              ),
-              h1: ({ children }) => (
-                <Typography variant="h4">{children}</Typography>
-              ),
-              h2: ({ children }) => (
-                <Typography variant="h5">{children}</Typography>
-              ),
-              h3: ({ children }) => (
-                <Typography variant="h6">{children}</Typography>
-              ),
-              ul: ({ children }) => (
-                <Box component="ul" sx={{ paddingLeft: 3, marginBottom: 2 }}>
-                  {children}
-                </Box>
-              ),
-              ol: ({ children }) => (
-                <Box component="ol" sx={{ paddingLeft: 3, marginBottom: 2 }}>
-                  {children}
-                </Box>
-              ),
-              li: ({ children }) => (
-                <li>
-                  <Typography variant="body2">{children}</Typography>
-                </li>
-              ),
-              strong: ({ children }) => <strong>{children}</strong>,
-              em: ({ children }) => <em>{children}</em>,
-              code: ({ children }) => (
-                <Box
-                  component="pre"
-                  sx={{
-                    backgroundColor: "var(--background-color)",
-                    color: "var(--text-color)",
-                    padding: 3,
-                    borderRadius: 2,
-                    fontSize: "0.95rem",
-                    overflowX: "auto",
-                    width: "100%",
-                    whiteSpace: "pre-wrap",
-                    marginTop: 2,
-                    marginBottom: 2,
-                  }}
-                >
-                  <code>{children}</code>
-                </Box>
-              ),
-            }}
-          />
+          {Object.keys(entry.parts[0]).includes("text") ? (
+            <ReactMarkdown
+              children={entry.parts[0].text}
+              components={{
+                p: ({ node, ...props }) => (
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      lineHeight: 1.2,
+                      marginBottom: 2,
+                      "&:last-of-type": {
+                        marginBottom: 0,
+                      },
+                    }}
+                    {...props}
+                  />
+                ),
+                h1: ({ children }) => (
+                  <Typography variant="h4">{children}</Typography>
+                ),
+                h2: ({ children }) => (
+                  <Typography variant="h5">{children}</Typography>
+                ),
+                h3: ({ children }) => (
+                  <Typography variant="h6">{children}</Typography>
+                ),
+                ul: ({ children }) => (
+                  <Box component="ul" sx={{ paddingLeft: 3, marginBottom: 2 }}>
+                    {children}
+                  </Box>
+                ),
+                ol: ({ children }) => (
+                  <Box component="ol" sx={{ paddingLeft: 3, marginBottom: 2 }}>
+                    {children}
+                  </Box>
+                ),
+                li: ({ children }) => (
+                  <li>
+                    <Typography variant="body2">{children}</Typography>
+                  </li>
+                ),
+                strong: ({ children }) => <strong>{children}</strong>,
+                em: ({ children }) => <em>{children}</em>,
+                code: ({ children }) => (
+                  <Box
+                    component="pre"
+                    sx={{
+                      backgroundColor: "var(--background-color)",
+                      color: "var(--text-color)",
+                      padding: 3,
+                      borderRadius: 2,
+                      fontSize: "0.95rem",
+                      overflowX: "auto",
+                      width: "100%",
+                      whiteSpace: "pre-wrap",
+                      marginTop: 2,
+                      marginBottom: 2,
+                    }}
+                  >
+                    <code>{children}</code>
+                  </Box>
+                ),
+              }}
+            />
+          ) : (
+            <img
+              src={`data:${entry.parts[0].inlineData.mimeType};base64,${entry.parts[0].inlineData.data}`}
+              alt="Generated"
+              style={{ maxWidth: "100%", marginTop: 12, borderRadius: 8 }}
+            />
+          )}
         </Box>
       ))
     );

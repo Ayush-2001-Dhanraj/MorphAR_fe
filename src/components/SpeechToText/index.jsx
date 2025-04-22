@@ -53,8 +53,6 @@ function SpeechToText({ open, handleClose, save }) {
     }
   }, [transcript]);
 
-  console.log("listening", listening);
-
   return (
     <Modal
       open={open}
