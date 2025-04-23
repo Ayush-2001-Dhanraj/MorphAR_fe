@@ -13,7 +13,7 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 400,
-  bgcolor: "var(--secondary-color)",
+  bgcolor: "var(--background-color)",
   border: "2px solid var(--accent-color)",
   color: "var(--text-color)",
   boxShadow: 24,

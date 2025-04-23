@@ -14,6 +14,7 @@ import models from "../../models";
 import ReactMarkdown from "react-markdown";
 import Loader from "../Loading";
 import SpeechToText from "../SpeechToText";
+import ImageViewer from "../ImageViewer";
 
 const DrawerHeader = styled("Box")(({ theme }) => ({
   display: "flex",
@@ -29,12 +30,23 @@ function Main() {
   const [loading, setLoading] = useState(false);
 
   const [openSpeech, setOpenSpeech] = useState(false);
-
   const handleCloseSpeech = () => setOpenSpeech(false);
   const handleSaveTranscript = (transcript) => {
     setInput(transcript);
     handleCloseSpeech();
     handleSend(transcript);
+  };
+
+  const [openImage, setOpenImage] = useState(true);
+  const [selectedImage, setSelectedImage] = useState("");
+  const closeOpenImage = () => {
+    setOpenImage(false);
+    setSelectedImage("");
+  };
+
+  const handleClickImage = (data) => {
+    setSelectedImage(data);
+    setOpenImage(true);
   };
 
   const bottomRef = useRef(null);
@@ -115,77 +127,97 @@ function Main() {
             paddingLeft: 4,
           }}
         >
-          {Object.keys(entry.parts[0]).includes("text") ? (
-            <ReactMarkdown
-              children={entry.parts[0].text}
-              components={{
-                p: ({ node, ...props }) => (
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      lineHeight: 1.2,
-                      marginBottom: 2,
-                      "&:last-of-type": {
-                        marginBottom: 0,
-                      },
+          {entry.parts.map((part, i) => {
+            console.log(part);
+            return (
+              <>
+                {Object.keys(part).includes("text") ? (
+                  <ReactMarkdown
+                    key={i}
+                    children={part.text}
+                    components={{
+                      p: ({ node, ...props }) => (
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            lineHeight: 1.2,
+                            marginBottom: 2,
+                            "&:last-of-type": {
+                              marginBottom: 0,
+                            },
+                          }}
+                          {...props}
+                        />
+                      ),
+                      h1: ({ children }) => (
+                        <Typography variant="h4">{children}</Typography>
+                      ),
+                      h2: ({ children }) => (
+                        <Typography variant="h5">{children}</Typography>
+                      ),
+                      h3: ({ children }) => (
+                        <Typography variant="h6">{children}</Typography>
+                      ),
+                      ul: ({ children }) => (
+                        <Box
+                          component="ul"
+                          sx={{ paddingLeft: 3, marginBottom: 2 }}
+                        >
+                          {children}
+                        </Box>
+                      ),
+                      ol: ({ children }) => (
+                        <Box
+                          component="ol"
+                          sx={{ paddingLeft: 3, marginBottom: 2 }}
+                        >
+                          {children}
+                        </Box>
+                      ),
+                      li: ({ children }) => (
+                        <li>
+                          <Typography variant="body2">{children}</Typography>
+                        </li>
+                      ),
+                      strong: ({ children }) => <strong>{children}</strong>,
+                      em: ({ children }) => <em>{children}</em>,
+                      code: ({ children }) => (
+                        <Box
+                          component="pre"
+                          sx={{
+                            backgroundColor: "var(--background-color)",
+                            color: "var(--text-color)",
+                            padding: 3,
+                            borderRadius: 2,
+                            fontSize: "0.95rem",
+                            overflowX: "auto",
+                            width: "100%",
+                            whiteSpace: "pre-wrap",
+                            marginTop: 2,
+                            marginBottom: 2,
+                          }}
+                        >
+                          <code>{children}</code>
+                        </Box>
+                      ),
                     }}
-                    {...props}
                   />
-                ),
-                h1: ({ children }) => (
-                  <Typography variant="h4">{children}</Typography>
-                ),
-                h2: ({ children }) => (
-                  <Typography variant="h5">{children}</Typography>
-                ),
-                h3: ({ children }) => (
-                  <Typography variant="h6">{children}</Typography>
-                ),
-                ul: ({ children }) => (
-                  <Box component="ul" sx={{ paddingLeft: 3, marginBottom: 2 }}>
-                    {children}
-                  </Box>
-                ),
-                ol: ({ children }) => (
-                  <Box component="ol" sx={{ paddingLeft: 3, marginBottom: 2 }}>
-                    {children}
-                  </Box>
-                ),
-                li: ({ children }) => (
-                  <li>
-                    <Typography variant="body2">{children}</Typography>
-                  </li>
-                ),
-                strong: ({ children }) => <strong>{children}</strong>,
-                em: ({ children }) => <em>{children}</em>,
-                code: ({ children }) => (
-                  <Box
-                    component="pre"
-                    sx={{
-                      backgroundColor: "var(--background-color)",
-                      color: "var(--text-color)",
-                      padding: 3,
-                      borderRadius: 2,
-                      fontSize: "0.95rem",
-                      overflowX: "auto",
-                      width: "100%",
-                      whiteSpace: "pre-wrap",
-                      marginTop: 2,
-                      marginBottom: 2,
-                    }}
-                  >
-                    <code>{children}</code>
-                  </Box>
-                ),
-              }}
-            />
-          ) : (
-            <img
-              src={`data:${entry.parts[0].inlineData.mimeType};base64,${entry.parts[0].inlineData.data}`}
-              alt="Generated"
-              style={{ maxWidth: "100%", marginTop: 12, borderRadius: 8 }}
-            />
-          )}
+                ) : (
+                  <img
+                    key={i}
+                    onClick={() =>
+                      handleClickImage(
+                        `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`
+                      )
+                    }
+                    src={`data:${part.inlineData.mimeType};base64,${part.inlineData.data}`}
+                    alt="Generated"
+                    style={{ maxWidth: "100%", marginTop: 12, borderRadius: 8 }}
+                  />
+                )}
+              </>
+            );
+          })}
         </Box>
       ))
     );
@@ -271,6 +303,12 @@ function Main() {
         open={openSpeech}
         handleClose={handleCloseSpeech}
         save={handleSaveTranscript}
+      />
+
+      <ImageViewer
+        open={openImage && selectedImage.length}
+        handleClose={closeOpenImage}
+        data={selectedImage}
       />
     </>
   );
