@@ -27,8 +27,6 @@ function isImagePrompt(history, prompt) {
 async function get_gen_text(history, prompt) {
   const isImage = isImagePrompt(history, prompt);
 
-  console.log("isImage", isImage);
-
   const chat = ai.chats.create({
     model: isImage
       ? "gemini-2.0-flash-exp-image-generation"

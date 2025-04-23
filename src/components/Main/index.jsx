@@ -100,10 +100,6 @@ function Main() {
     scrollToBottom();
   }, [history, loading]);
 
-  useEffect(() => {
-    console.log("history", history);
-  }, [history]);
-
   const renderHistory = useMemo(() => {
     return history.length === 0 ? (
       <Typography variant="h4" align="center">
@@ -128,7 +124,6 @@ function Main() {
           }}
         >
           {entry.parts.map((part, i) => {
-            console.log(part);
             return (
               <>
                 {Object.keys(part).includes("text") ? (
