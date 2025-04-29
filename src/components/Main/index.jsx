@@ -1,10 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import styles from "./Main.module.css";
 import {
   Box,
   Container,
   IconButton,
-  styled,
   TextField,
   Typography,
 } from "@mui/material";
@@ -15,16 +13,9 @@ import ReactMarkdown from "react-markdown";
 import Loader from "../Loading";
 import SpeechToText from "../SpeechToText";
 import ImageViewer from "../ImageViewer";
+import GradientTxt from "../GradientTxt";
 
-const DrawerHeader = styled("Box")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar,
-}));
-
-function Main() {
+function Main({ greetMsg }) {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -102,8 +93,8 @@ function Main() {
 
   const renderHistory = useMemo(() => {
     return history.length === 0 ? (
-      <Typography variant="h4" align="center">
-        <span className={styles.gradient_txt}>Hello, Dev</span>
+      <Typography variant="h6" align="center">
+        <GradientTxt txt={greetMsg} />
       </Typography>
     ) : (
       history.map((entry, index) => (
@@ -220,79 +211,70 @@ function Main() {
 
   return (
     <>
-      <Box className={styles.main} pr={2} pl={2}>
-        <DrawerHeader sx={{ justifyContent: "space-between" }}>
-          <Typography variant="h6" className={styles.gradient_txt}>
-            Ayush
-          </Typography>
-          <Box className={styles.avatar_placeholder}></Box>
-        </DrawerHeader>
+      <Container
+        maxWidth="md"
+        ref={containerRef}
+        sx={{
+          height: "calc(100vh - 180px)",
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          marginBottom: 2.5,
+        }}
+      >
+        {renderHistory}
 
-        <Container
-          maxWidth="md"
-          ref={containerRef}
+        {loading && <Loader />}
+
+        <div ref={bottomRef} />
+      </Container>
+
+      <Container maxWidth="md">
+        <Box
           sx={{
-            height: "calc(100vh - 180px)",
-            overflowY: "auto",
+            backgroundColor: "var(--primary-color)",
             display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            marginBottom: 2.5,
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 8,
+            gap: 1,
           }}
+          pl={2}
+          pr={2}
         >
-          {renderHistory}
-
-          {loading && <Loader />}
-
-          <div ref={bottomRef} />
-        </Container>
-
-        <Container maxWidth="md">
-          <Box
-            sx={{
-              backgroundColor: "var(--primary-color)",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 8,
-              gap: 1,
+          <TextField
+            variant="standard"
+            value={input}
+            onChange={handleInputChange}
+            fullWidth
+            disabled={loading}
+            InputProps={{
+              disableUnderline: true,
+              sx: {
+                color: "var(--secondary-color)",
+              },
             }}
-            pl={2}
-            pr={2}
-          >
-            <TextField
-              variant="standard"
-              value={input}
-              onChange={handleInputChange}
-              fullWidth
-              disabled={loading}
-              InputProps={{
-                disableUnderline: true,
-                sx: {
-                  color: "var(--secondary-color)",
-                },
-              }}
+          />
+          <IconButton disabled={loading} onClick={handleMicClick}>
+            <MicIcon
+              sx={{ color: "var(--secondary-color)" }}
+              fontSize="small"
             />
-            <IconButton disabled={loading} onClick={handleMicClick}>
-              <MicIcon
-                sx={{ color: "var(--secondary-color)" }}
-                fontSize="small"
-              />
-            </IconButton>
-            <IconButton onClick={() => handleSend()} disabled={loading}>
-              <SendIcon
-                sx={{
-                  color:
-                    input.trim().length && !loading
-                      ? "var(--text-color)"
-                      : "var(--secondary-color)",
-                }}
-                fontSize="small"
-              />
-            </IconButton>
-          </Box>
-        </Container>
-      </Box>
+          </IconButton>
+          <IconButton onClick={() => handleSend()} disabled={loading}>
+            <SendIcon
+              sx={{
+                color:
+                  input.trim().length && !loading
+                    ? "var(--text-color)"
+                    : "var(--secondary-color)",
+              }}
+              fontSize="small"
+            />
+          </IconButton>
+        </Box>
+      </Container>
 
       <SpeechToText
         open={openSpeech}

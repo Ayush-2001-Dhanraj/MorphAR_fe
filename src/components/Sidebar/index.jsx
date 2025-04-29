@@ -6,7 +6,9 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
+import ImageIcon from "@mui/icons-material/Image";
 import { Box, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -67,6 +69,7 @@ const Drawer = styled(MuiDrawer, {
 
 function SideBar() {
   const [open, setOpen] = React.useState(false);
+  const navigate = useNavigate();
 
   const handleToggleDrawer = () => {
     setOpen((preV) => !preV);
@@ -74,6 +77,11 @@ function SideBar() {
 
   const handleNewChat = () => {
     console.log("New Chat");
+    navigate("/");
+  };
+
+  const handleClickImgTo3D = () => {
+    navigate("/tripo");
   };
 
   return (
@@ -121,6 +129,30 @@ function SideBar() {
               color="var(--secondary-color)"
             >
               New Chat
+            </Typography>
+          )}
+        </IconButton>
+        <IconButton
+          onClick={handleClickImgTo3D}
+          sx={{
+            backgroundColor: "var(--background-color)",
+            borderRadius: open ? 4 : 50,
+            display: "inherit",
+            justifyContent: "flex-start",
+            paddingLeft: 1.5,
+            "&:hover": {
+              backgroundColor: "var(--background-color)",
+            },
+          }}
+        >
+          <ImageIcon sx={{ color: "var(--secondary-color)" }} />
+          {open && (
+            <Typography
+              variant="subtitle2"
+              pl={1}
+              color="var(--secondary-color)"
+            >
+              Image to 3D Models
             </Typography>
           )}
         </IconButton>
