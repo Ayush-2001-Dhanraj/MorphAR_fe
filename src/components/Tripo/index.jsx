@@ -1,15 +1,15 @@
 import { Box, Button, Container, Typography } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import GradientTxt from "../GradientTxt";
 import styles from "./Tripo.module.css";
 import clsx from "clsx";
+import Step1 from "./Step1";
 
 function Tripo({ greetMsg }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [image, setImage] = useState(null);
   const [bgRemovedImage, setBgRemovedImage] = useState(null);
-  const [modelUrl, setModelUrl] = useState(null);
-
+  const [isRemovingBg, setIsRemovingBg] = useState(false); // Optional loading indicator
   const steps = [
     {
       number: 1,
@@ -30,20 +30,12 @@ function Tripo({ greetMsg }) {
     },
   ];
 
-  // --- Simulated Handlers for Each Step ---
   const handleNextStep = async () => {
-    if (currentStep === 1 && !image) return;
-
-    if (currentStep === 2) {
-      // Simulate background removal API
-      const removed = await simulateBgRemoval(image);
-      setBgRemovedImage(removed);
-    }
-
-    if (currentStep === 3) {
-      // Simulate model generation
-      const model = await simulateModelGeneration(bgRemovedImage || image);
-      setModelUrl(model);
+    if (currentStep === 1 && image) {
+      const result = await removeBackground(image, setIsRemovingBg);
+      if (result) {
+        setBgRemovedImage(result);
+      }
     }
 
     if (currentStep < steps.length) {
@@ -51,70 +43,32 @@ function Tripo({ greetMsg }) {
     }
   };
 
-  const simulateBgRemoval = async (img) => {
-    return new Promise((res) =>
-      setTimeout(() => res(`${img}_bg_removed.png`), 1000)
-    );
-  };
+  const removeBackground = async (imageFile, setIsLoading) => {
+    const formData = new FormData();
+    formData.append("image_file", imageFile);
+    formData.append("size", "auto");
 
-  const simulateModelGeneration = async (img) => {
-    return new Promise((res) =>
-      setTimeout(
-        () => res(`https://fake-3d-model.com/model.glb?img=${img}`),
-        1500
-      )
-    );
-  };
+    setIsLoading(true);
+    try {
+      const response = await fetch("https://api.remove.bg/v1.0/removebg", {
+        method: "POST",
+        headers: {
+          "X-Api-Key": import.meta.env.VITE_REMOVE_BG,
+        },
+        body: formData,
+      });
 
-  // --- Rendered Content Per Step ---
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <Box>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImage(URL.createObjectURL(e.target.files[0]))}
-            />
-            {image && (
-              <img
-                src={image}
-                alt="Selected"
-                style={{ marginTop: 10, maxHeight: 200 }}
-              />
-            )}
-          </Box>
-        );
+      if (!response.ok) {
+        throw new Error("Background removal failed");
+      }
 
-      case 2:
-        return (
-          <Box>
-            <Typography variant="body1">Removing background...</Typography>
-            {bgRemovedImage && (
-              <img
-                src={bgRemovedImage}
-                alt="BG Removed"
-                style={{ marginTop: 10, maxHeight: 200 }}
-              />
-            )}
-          </Box>
-        );
-
-      case 3:
-        return (
-          <Box>
-            <Typography variant="body1">Generating 3D Model...</Typography>
-            {modelUrl && (
-              <a href={modelUrl} target="_blank" rel="noopener noreferrer">
-                View 3D Model
-              </a>
-            )}
-          </Box>
-        );
-
-      default:
-        return null;
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    } catch (err) {
+      console.error(err);
+      return null;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -150,27 +104,77 @@ function Tripo({ greetMsg }) {
             >
               {step.number}
             </Typography>
+            {step.number == 1 && (
+              <Step1
+                image={image}
+                setCurrentStep={setCurrentStep}
+                setImage={setImage}
+              />
+            )}
+
+            {step.number === 2 && (
+              <>
+                {isRemovingBg ? (
+                  <Typography variant="body2">
+                    Removing background...
+                  </Typography>
+                ) : (
+                  bgRemovedImage && (
+                    <img
+                      src={bgRemovedImage}
+                      alt="Background removed"
+                      className={styles.selectedImage}
+                    />
+                  )
+                )}
+              </>
+            )}
+
+            {step.number === 3 && (
+              <Typography variant="body2">Generating 3D model...</Typography>
+            )}
           </Box>
         ))}
       </Box>
 
-      <Typography align="center" variant="h5" gutterBottom>
-        <GradientTxt txt={steps[currentStep - 1].title} />
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Button
+          onClick={handleNextStep}
+          borderRadius={2}
+          pl={2}
+          pr={2}
+          sx={{ visibility: !image ? "hidden" : "visible" }}
+        >
+          <Typography>Next</Typography>
+        </Button>
 
-      <Typography align="center" variant="body1" gutterBottom>
+        <Typography align="center" variant="h5" gutterBottom>
+          <GradientTxt txt={steps[currentStep - 1].title} />
+        </Typography>
+      </Box>
+
+      <Typography align="center" variant="body1" color="var(--text-color)">
         {steps[currentStep - 1].description}
       </Typography>
 
-      <Box mt={2}>{renderStepContent()}</Box>
+      {}
 
-      {currentStep < steps.length && (
+      {/* <Box mt={2}>{renderStepContent()}</Box> */}
+
+      {/* {currentStep < steps.length && (
         <Box mt={3} display="flex" justifyContent="center">
           <Button variant="contained" onClick={handleNextStep}>
             Next
           </Button>
         </Box>
-      )}
+      )} */}
     </Container>
   );
 }
