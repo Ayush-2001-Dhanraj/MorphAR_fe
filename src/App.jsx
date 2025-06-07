@@ -1,5 +1,5 @@
 // App.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import Footer from "./components/Footer";
 import Main from "./pages/Main";
 import { Box } from "@mui/material";
@@ -9,6 +9,10 @@ import Tripo from "./pages/Tripo";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import Header from "./components/Header";
 import NotFound from "./pages/NotFound";
+import { useUser } from "@clerk/clerk-react";
+import { useDispatch } from "react-redux";
+import { updateUser } from "./redux/features/user/userSlice";
+import UserService from "./services/userServices";
 
 // Layout Component that wraps all pages
 const Layout = () => (
@@ -17,7 +21,7 @@ const Layout = () => (
       <SideBar />
       <Box className={styles.main} pr={2} pl={2}>
         <Header />
-        <Outlet /> {/* This renders child routes */}
+        <Outlet />
       </Box>
     </Box>
 
@@ -49,6 +53,24 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const { user: clerkUser } = useUser();
+  const dispatch = useDispatch();
+
+  const updateUserData = async (clerkUser) => {
+    const formattedEvent = {
+      email: clerkUser.primaryEmailAddress.emailAddress,
+      clerk_id: clerkUser.id,
+      name: clerkUser.fullName,
+    };
+    const result = await UserService.registerUser(formattedEvent);
+    dispatch(updateUser(result));
+  };
+
+  useEffect(() => {
+    if (clerkUser) {
+      updateUserData(clerkUser);
+    }
+  }, [clerkUser]);
   return <RouterProvider router={router} />;
 }
 

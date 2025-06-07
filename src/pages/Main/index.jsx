@@ -89,6 +89,7 @@ function Main({ greetMsg }) {
 
   useEffect(() => {
     scrollToBottom();
+    console.log(history);
   }, [history, loading]);
 
   const renderHistory = useMemo(() => {
