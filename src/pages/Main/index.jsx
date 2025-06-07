@@ -10,10 +10,10 @@ import MicIcon from "@mui/icons-material/Mic";
 import SendIcon from "@mui/icons-material/Send";
 import models from "../../models";
 import ReactMarkdown from "react-markdown";
-import Loader from "../Loading";
-import SpeechToText from "../SpeechToText";
-import ImageViewer from "../ImageViewer";
-import GradientTxt from "../GradientTxt";
+import Loader from "../../components/Loading";
+import SpeechToText from "../../components/SpeechToText";
+import ImageViewer from "../../components/ImageViewer";
+import GradientTxt from "../../components/GradientTxt";
 
 function Main({ greetMsg }) {
   const [input, setInput] = useState("");
@@ -226,7 +226,6 @@ function Main({ greetMsg }) {
         {renderHistory}
 
         {loading && <Loader />}
-
         <div ref={bottomRef} />
       </Container>
 

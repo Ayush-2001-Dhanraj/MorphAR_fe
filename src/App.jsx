@@ -1,14 +1,14 @@
 // App.jsx
 import React from "react";
 import Footer from "./components/Footer";
-import Main from "./components/Main";
+import Main from "./pages/Main";
 import { Box } from "@mui/material";
 import SideBar from "./components/Sidebar";
 import styles from "./App.module.css";
-
+import Tripo from "./pages/Tripo";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import Header from "./components/Header";
-import Tripo from "./components/Tripo";
+import NotFound from "./pages/NotFound";
 
 // Layout Component that wraps all pages
 const Layout = () => (
@@ -20,6 +20,7 @@ const Layout = () => (
         <Outlet /> {/* This renders child routes */}
       </Box>
     </Box>
+
     <Footer />
   </>
 );
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
         element: (
           <Tripo greetMsg="Hello, 3D Dev let's create a 3D model in minutes." />
         ),
+      },
+      {
+        path: "*", // Catch-all route for 404
+        element: <NotFound />,
       },
     ],
   },

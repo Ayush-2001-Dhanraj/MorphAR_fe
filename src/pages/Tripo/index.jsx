@@ -1,6 +1,6 @@
 import { Box, Button, Container, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import GradientTxt from "../GradientTxt";
+import { useState } from "react";
+import GradientTxt from "../../components/GradientTxt";
 import styles from "./Tripo.module.css";
 import clsx from "clsx";
 import Step1 from "./Step1";
@@ -25,8 +25,9 @@ function Tripo({ greetMsg }) {
     },
     {
       number: 3,
-      title: "Generate 3D Model",
-      description: "We use AI to create a 3D model from your image.",
+      title: "Generate 3D Model in Queue",
+      description:
+        "Modelling is done in queue check Queue to see the actual status.",
     },
   ];
 
@@ -36,6 +37,15 @@ function Tripo({ greetMsg }) {
       if (result) {
         setBgRemovedImage(result);
       }
+    }
+
+    if (currentStep === 2 && bgRemovedImage) {
+      const file = await fetch(bgRemovedImage).then((res) => res.blob());
+
+      const imageToken = await uploadToTripo(file);
+      const taskId = await trigger3DGeneration(imageToken);
+
+      console.log("Model task submitted:", taskId);
     }
 
     if (currentStep < steps.length) {
@@ -70,6 +80,51 @@ function Tripo({ greetMsg }) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const uploadToTripo = async (file) => {
+    console.log("File", file);
+    const formData = new FormData();
+    formData.append("file", file, "image.png");
+
+    const response = await fetch(
+      "https://api.tripo3d.ai/v2/openapi/upload/sts",
+      {
+        mode: "no-cors",
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_TRIPO_API_KEY}`,
+        },
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+    return data.data.image_token;
+  };
+
+  const trigger3DGeneration = async (imageToken) => {
+    const payload = {
+      type: "image_to_model",
+      file_token: imageToken,
+      model_version: "v2.5-20250123", // or "Turbo-v1.0-20250506"
+      orientation: "align_image",
+      texture: true,
+      pbr: true,
+      style: "object:steampunk", // Optional
+    };
+
+    const response = await fetch("https://api.tripo3d.ai/v2/openapi/task", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_TRIPO_API_KEY}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    return data.task_id;
   };
 
   return (
@@ -111,13 +166,22 @@ function Tripo({ greetMsg }) {
                 setImage={setImage}
               />
             )}
-
             {step.number === 2 && (
               <>
                 {isRemovingBg ? (
-                  <Typography variant="body2">
-                    Removing background...
-                  </Typography>
+                  <Box
+                    sx={{
+                      height: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      color: "var(--text-color)",
+                    }}
+                  >
+                    <Typography variant="body2">
+                      Removing background...
+                    </Typography>
+                  </Box>
                 ) : (
                   bgRemovedImage && (
                     <img
@@ -129,9 +193,18 @@ function Tripo({ greetMsg }) {
                 )}
               </>
             )}
-
-            {step.number === 3 && (
-              <Typography variant="body2">Generating 3D model...</Typography>
+            {step.number === 3 && currentStep === 3 && (
+              <Box
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "var(--text-color)",
+                }}
+              >
+                <Typography variant="body2">Model added to Queue...</Typography>
+              </Box>
             )}
           </Box>
         ))}
@@ -163,18 +236,6 @@ function Tripo({ greetMsg }) {
       <Typography align="center" variant="body1" color="var(--text-color)">
         {steps[currentStep - 1].description}
       </Typography>
-
-      {}
-
-      {/* <Box mt={2}>{renderStepContent()}</Box> */}
-
-      {/* {currentStep < steps.length && (
-        <Box mt={3} display="flex" justifyContent="center">
-          <Button variant="contained" onClick={handleNextStep}>
-            Next
-          </Button>
-        </Box>
-      )} */}
     </Container>
   );
 }

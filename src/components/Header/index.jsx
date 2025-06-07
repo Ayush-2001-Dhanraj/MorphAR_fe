@@ -1,7 +1,13 @@
-import { Box, styled, Typography } from "@mui/material";
-import styles from "./Header.module.css";
-import React from "react";
+import { IconButton, styled, Typography } from "@mui/material";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/clerk-react";
 import GradientTxt from "../GradientTxt";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { useNavigate } from "react-router";
 
 const DrawerHeader = styled("Box")(({ theme }) => ({
   display: "flex",
@@ -12,12 +18,34 @@ const DrawerHeader = styled("Box")(({ theme }) => ({
 }));
 
 function Header() {
+  const navigate = useNavigate();
+
+  const handleNameClick = () => {
+    navigate("/");
+  };
+
   return (
     <DrawerHeader sx={{ justifyContent: "space-between" }}>
-      <Typography variant="h6">
+      <Typography
+        variant="h6"
+        sx={{ cursor: "pointer" }}
+        onClick={handleNameClick}
+      >
         <GradientTxt txt="Ayush" />
       </Typography>
-      <Box className={styles.avatar_placeholder}></Box>
+      <SignedOut>
+        <SignInButton mode="modal">
+          <IconButton>
+            <AccountCircleIcon
+              fontSize="large"
+              sx={{ color: "var(--text-color)" }}
+            />
+          </IconButton>
+        </SignInButton>
+      </SignedOut>
+      <SignedIn>
+        <UserButton />
+      </SignedIn>
     </DrawerHeader>
   );
 }
