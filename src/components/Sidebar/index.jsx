@@ -1,5 +1,5 @@
 // Sidebar.js
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { styled } from "@mui/material/styles";
 import MuiDrawer from "@mui/material/Drawer";
 import Divider from "@mui/material/Divider";
@@ -9,6 +9,16 @@ import AddIcon from "@mui/icons-material/Add";
 import ImageIcon from "@mui/icons-material/Image";
 import { Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getUser } from "../../redux/features/user/userSlice";
+import {
+  getAllChats,
+  updateAllChats,
+  updateChat,
+} from "../../redux/features/chat/chatSlice";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ChatService from "../../services/chatServices";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const drawerWidth = 240;
 
@@ -71,17 +81,33 @@ function SideBar() {
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
 
+  const user = useSelector(getUser);
+  const allChats = useSelector(getAllChats);
+  const dispatch = useDispatch();
+
   const handleToggleDrawer = () => {
     setOpen((preV) => !preV);
   };
 
   const handleNewChat = () => {
-    console.log("New Chat");
+    dispatch(updateChat(null));
     navigate("/");
   };
 
   const handleClickImgTo3D = () => {
     navigate("/tripo");
+  };
+
+  const handleClickChat = (chat_id) => {
+    dispatch(updateChat(chat_id));
+    navigate("/");
+  };
+
+  const deleteChat = async (chat_id) => {
+    await ChatService.deleteChat(chat_id);
+    const response = await ChatService.getChats({ clerk_id: user.clerk_id });
+    dispatch(updateAllChats(response));
+    handleNewChat();
   };
 
   return (
@@ -102,12 +128,13 @@ function SideBar() {
           <MenuIcon fontSize="small" sx={{ color: "var(--text-color)" }} />
         </IconButton>
       </DrawerHeader>
-      <Divider />
-      <Box
-        mt={4}
-        p={1}
-        sx={{ display: "flex", flexDirection: "column", gap: 1 }}
-      >
+      <Divider
+        sx={{
+          borderBottomWidth: 5,
+          borderBottomColor: "var(--background-color)",
+        }}
+      />
+      <Box p={1} sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <IconButton
           onClick={handleNewChat}
           sx={{
@@ -157,6 +184,57 @@ function SideBar() {
           )}
         </IconButton>
       </Box>
+      <Divider
+        sx={{
+          borderBottomWidth: 5,
+          borderBottomColor: "var(--background-color)",
+        }}
+      />
+      {allChats.length && open ? (
+        <Box p={1} sx={{ flex: 1, overflow: "auto" }}>
+          <Typography
+            variant="subtitle2"
+            pl={1}
+            color="var(--secondary-color)"
+            fontWeight={"bold"}
+            mb={1}
+          >
+            Recent
+          </Typography>
+          {allChats.map((chat) => {
+            console.log(chat);
+            const heading = chat.chat_history[0].parts[0].text;
+            return (
+              <Typography
+                key={chat.id}
+                variant="subtitle2"
+                pl={1}
+                color="var(--secondary-color)"
+                sx={{
+                  borderRadius: 50,
+                  marginBottom: 1,
+                  cursor: "pointer",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Box onClick={() => handleClickChat(chat.id)}>
+                  {heading.length > 23
+                    ? `${heading.substring(0, 23)} ...`
+                    : heading}
+                </Box>
+                <IconButton onClick={() => deleteChat(chat.id)}>
+                  <DeleteIcon
+                    fontSize="small"
+                    sx={{ color: "var(--secondary-color)" }}
+                  />
+                </IconButton>
+              </Typography>
+            );
+          })}
+        </Box>
+      ) : null}
     </Drawer>
   );
 }

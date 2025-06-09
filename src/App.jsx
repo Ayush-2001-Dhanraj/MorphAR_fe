@@ -10,9 +10,13 @@ import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import Header from "./components/Header";
 import NotFound from "./pages/NotFound";
 import { useUser } from "@clerk/clerk-react";
-import { useDispatch } from "react-redux";
-import { updateUser } from "./redux/features/user/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { getUser, updateUser } from "./redux/features/user/userSlice";
 import UserService from "./services/userServices";
+import ChatService from "./services/chatServices";
+import { updateAllChats } from "./redux/features/chat/chatSlice";
+import { getIsLoading, setIsLoading } from "./redux/features/app/appSlice";
+import LoadingOverlay from "./components/LoadingOverlay";
 
 // Layout Component that wraps all pages
 const Layout = () => (
@@ -55,8 +59,11 @@ const router = createBrowserRouter([
 function App() {
   const { user: clerkUser } = useUser();
   const dispatch = useDispatch();
+  const user = useSelector(getUser);
+  const isLoading = useSelector(getIsLoading);
 
   const updateUserData = async (clerkUser) => {
+    dispatch(setIsLoading(true));
     const formattedEvent = {
       email: clerkUser.primaryEmailAddress.emailAddress,
       clerk_id: clerkUser.id,
@@ -64,6 +71,14 @@ function App() {
     };
     const result = await UserService.registerUser(formattedEvent);
     dispatch(updateUser(result));
+    dispatch(setIsLoading(false));
+  };
+
+  const getAllChats = async (user) => {
+    dispatch(setIsLoading(true));
+    const response = await ChatService.getChats({ clerk_id: user.clerk_id });
+    dispatch(updateAllChats(response));
+    dispatch(setIsLoading(false));
   };
 
   useEffect(() => {
@@ -71,7 +86,16 @@ function App() {
       updateUserData(clerkUser);
     }
   }, [clerkUser]);
-  return <RouterProvider router={router} />;
+
+  useEffect(() => {
+    if (user) getAllChats(user);
+  }, [user]);
+  return (
+    <>
+      {isLoading && <LoadingOverlay />}
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export default App;

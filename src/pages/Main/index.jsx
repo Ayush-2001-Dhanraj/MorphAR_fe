@@ -14,11 +14,25 @@ import Loader from "../../components/Loading";
 import SpeechToText from "../../components/SpeechToText";
 import ImageViewer from "../../components/ImageViewer";
 import GradientTxt from "../../components/GradientTxt";
+import { useDispatch, useSelector } from "react-redux";
+import { getUser } from "../../redux/features/user/userSlice";
+import {
+  getCurrentChat,
+  updateAllChats,
+  updateChat,
+} from "../../redux/features/chat/chatSlice";
+import ChatService from "../../services/chatServices";
+import { setIsLoading } from "../../redux/features/app/appSlice";
 
 function Main({ greetMsg }) {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const user = useSelector(getUser);
+  const currentChat = useSelector(getCurrentChat);
+
+  const dispatch = useDispatch();
 
   const [openSpeech, setOpenSpeech] = useState(false);
   const handleCloseSpeech = () => setOpenSpeech(false);
@@ -53,10 +67,31 @@ function Main({ greetMsg }) {
     setLoading(true);
 
     const response = await models.text(history, prompt);
-    setHistory([...history]);
 
+    const formattedData = {
+      id: currentChat,
+      user_id: user.id,
+      chat_history: JSON.stringify([...history]),
+    };
+
+    const result = await ChatService.createChat(formattedData);
+    if (!currentChat) {
+      dispatch(updateChat(result.id));
+      getAllChats();
+    }
+    getChatHistory(result.id);
     setLoading(false);
     setInput("");
+  };
+
+  const getAllChats = async () => {
+    const response = await ChatService.getChats({ clerk_id: user.clerk_id });
+    dispatch(updateAllChats(response));
+  };
+
+  const getChatHistory = async (chat_id) => {
+    const result = await ChatService.getChat(chat_id);
+    setHistory(result.chat_history);
   };
 
   const scrollToBottom = () => {
@@ -89,8 +124,15 @@ function Main({ greetMsg }) {
 
   useEffect(() => {
     scrollToBottom();
-    console.log(history);
   }, [history, loading]);
+
+  useEffect(() => {
+    if (currentChat) {
+      getChatHistory(currentChat);
+    } else {
+      setHistory([]);
+    }
+  }, [currentChat]);
 
   const renderHistory = useMemo(() => {
     return history.length === 0 ? (
