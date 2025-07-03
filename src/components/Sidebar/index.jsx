@@ -18,7 +18,6 @@ import {
 } from "../../redux/features/chat/chatSlice";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ChatService from "../../services/chatServices";
-import CircularProgress from "@mui/material/CircularProgress";
 
 const drawerWidth = 240;
 
@@ -38,9 +37,6 @@ const closedMixin = (theme) => ({
   }),
   overflowX: "hidden",
   width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up("sm")]: {
-    width: `calc(${theme.spacing(8)} + 1px)`,
-  },
 });
 
 const DrawerHeader = styled("div")(({ theme }) => ({
@@ -122,6 +118,8 @@ function SideBar() {
           color: "var(--text-color)",
         },
       }}
+      onMouseEnter={handleToggleDrawer}
+      onMouseLeave={handleToggleDrawer}
     >
       <DrawerHeader>
         <IconButton onClick={handleToggleDrawer} sx={{ paddingLeft: 1.5 }}>
@@ -142,7 +140,6 @@ function SideBar() {
             borderRadius: open ? 4 : 50,
             display: "inherit",
             justifyContent: "flex-start",
-            paddingLeft: 1.5,
             "&:hover": {
               backgroundColor: "var(--background-color)",
             },
@@ -166,7 +163,6 @@ function SideBar() {
             borderRadius: open ? 4 : 50,
             display: "inherit",
             justifyContent: "flex-start",
-            paddingLeft: 1.5,
             "&:hover": {
               backgroundColor: "var(--background-color)",
             },

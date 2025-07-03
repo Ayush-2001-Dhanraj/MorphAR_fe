@@ -3,6 +3,7 @@
     display: flex;
     position: relative;
     background-color: var(--background-color);
+    overflow-x: hidden;
 }
 
 .main {

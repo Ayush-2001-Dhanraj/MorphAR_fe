@@ -31,7 +31,7 @@ function Header() {
         sx={{ cursor: "pointer" }}
         onClick={handleNameClick}
       >
-        <GradientTxt txt="Ayush" />
+        <GradientTxt txt="Areisis" />
       </Typography>
       <SignedOut>
         <SignInButton mode="modal">

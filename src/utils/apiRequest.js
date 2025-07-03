@@ -4,17 +4,21 @@ import { BASE_URL } from "./constants";
 const apiRequest = async (method, url, data, param) => {
   try {
     const config = {
-      method: method,
+      method,
       url: `${BASE_URL}${url}`,
-      data: data,
+      data,
       params: param,
     };
+
+    if (data instanceof FormData) {
+      config.headers = { "Content-Type": "multipart/form-data" };
+    }
 
     const response = await axios(config);
     return response.data;
   } catch (error) {
-    console.log(error);
-    return error.response.data;
+    console.error("API Error:", error);
+    return error.response?.data || { message: "Unknown error" };
   }
 };
 

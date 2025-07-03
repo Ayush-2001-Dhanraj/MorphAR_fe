@@ -23,6 +23,8 @@ import {
 } from "../../redux/features/chat/chatSlice";
 import ChatService from "../../services/chatServices";
 import { setIsLoading } from "../../redux/features/app/appSlice";
+import { isImagePrompt } from "../../models/text_model";
+import { useClerk } from "@clerk/clerk-react";
 
 function Main({ greetMsg }) {
   const [input, setInput] = useState("");
@@ -31,6 +33,8 @@ function Main({ greetMsg }) {
 
   const user = useSelector(getUser);
   const currentChat = useSelector(getCurrentChat);
+
+  const { openSignIn } = useClerk();
 
   const dispatch = useDispatch();
 
@@ -63,25 +67,29 @@ function Main({ greetMsg }) {
 
   const handleSend = async (customInput = "") => {
     const prompt = customInput || input;
-
     setLoading(true);
 
-    const response = await models.text(history, prompt);
-
-    const formattedData = {
-      id: currentChat,
-      user_id: user.id,
-      chat_history: JSON.stringify([...history]),
-    };
-
-    const result = await ChatService.createChat(formattedData);
-    if (!currentChat) {
-      dispatch(updateChat(result.id));
-      getAllChats();
+    const useImageModel = isImagePrompt(history, prompt);
+    if (!user) {
+      openSignIn();
+      setLoading(false);
+      setInput("");
+    } else {
+      const response = await models.text(history, prompt, useImageModel);
+      const formattedData = {
+        id: currentChat,
+        user_id: user?.id,
+        chat_history: JSON.stringify([...history]),
+      };
+      const result = await ChatService.createChat(formattedData);
+      if (!currentChat) {
+        dispatch(updateChat(result.id));
+        getAllChats();
+      }
+      getChatHistory(result.id);
+      setLoading(false);
+      setInput("");
     }
-    getChatHistory(result.id);
-    setLoading(false);
-    setInput("");
   };
 
   const getAllChats = async () => {
@@ -137,7 +145,7 @@ function Main({ greetMsg }) {
   const renderHistory = useMemo(() => {
     return history.length === 0 ? (
       <Typography variant="h6" align="center">
-        <GradientTxt txt={greetMsg} />
+        <GradientTxt txt={user ? `Namaste, ${user.name}!!!` : greetMsg} />
       </Typography>
     ) : (
       history.map((entry, index) => (

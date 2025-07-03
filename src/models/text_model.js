@@ -1,7 +1,7 @@
 import { ai } from "./index";
 import { Modality } from "@google/genai";
 
-function isImagePrompt(history, prompt) {
+export function isImagePrompt(history, prompt) {
   const promptLower = prompt.toLowerCase();
 
   const imageActionKeywords =
@@ -24,9 +24,7 @@ function isImagePrompt(history, prompt) {
   return containsImageKeyword || lastWasImage || refersToImage;
 }
 
-async function get_gen_text(history, prompt) {
-  const isImage = isImagePrompt(history, prompt);
-
+async function get_gen_text(history, prompt, isImage) {
   const chat = ai.chats.create({
     model: isImage
       ? "gemini-2.0-flash-exp-image-generation"

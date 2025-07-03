@@ -1,15 +1,20 @@
 import { Box, Button, Container, Typography } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GradientTxt from "../../components/GradientTxt";
 import styles from "./Tripo.module.css";
 import clsx from "clsx";
 import Step1 from "./Step1";
+import TripoService from "../../services/tripoServices";
 
 function Tripo({ greetMsg }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [image, setImage] = useState(null);
   const [bgRemovedImage, setBgRemovedImage] = useState(null);
   const [isRemovingBg, setIsRemovingBg] = useState(false); // Optional loading indicator
+  const [taskId, setTaskId] = useState(null);
+  const [taskStatus, setTaskStatus] = useState(null);
+  const [modelUrls, setModelUrls] = useState(null);
+
   const steps = [
     {
       number: 1,
@@ -29,7 +34,46 @@ function Tripo({ greetMsg }) {
       description:
         "Modelling is done in queue check Queue to see the actual status.",
     },
+    {
+      number: 3,
+      title: "Generate 3D Model in Queue",
+      description:
+        "Modelling is done in queue check Queue to see the actual status.",
+    },
+    {
+      number: 3,
+      title: "Generate 3D Model in Queue",
+      description:
+        "Modelling is done in queue check Queue to see the actual status.",
+    },
   ];
+
+  useEffect(() => {
+    if (!taskId) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const data = await TripoService.getTaskStatus(taskId);
+        console.log("Task status:", data.status);
+        setTaskStatus(data.task.status);
+
+        if (data.task.status === "success") {
+          setModelUrls(data.task.output);
+          console.log("Final output:", data.output);
+          clearInterval(interval);
+        }
+
+        if (["failed", "cancelled", "unknown"].includes(data.task.status)) {
+          clearInterval(interval);
+        }
+      } catch (err) {
+        console.error("Polling failed:", err);
+        clearInterval(interval);
+      }
+    }, 4000); // poll every 4 seconds
+
+    return () => clearInterval(interval); // cleanup on unmount
+  }, [taskId]);
 
   const handleNextStep = async () => {
     if (currentStep === 1 && image) {
@@ -40,12 +84,17 @@ function Tripo({ greetMsg }) {
     }
 
     if (currentStep === 2 && bgRemovedImage) {
-      const file = await fetch(bgRemovedImage).then((res) => res.blob());
-
-      const imageToken = await uploadToTripo(file);
-      const taskId = await trigger3DGeneration(imageToken);
-
-      console.log("Model task submitted:", taskId);
+      if (currentStep === 2 && bgRemovedImage) {
+        const file = await fetch(bgRemovedImage).then((res) => res.blob());
+        try {
+          const data = await TripoService.createTask(file);
+          const taskId = data.task_id;
+          setTaskId(taskId);
+          console.log("Model task submitted:", taskId);
+        } catch (err) {
+          console.error("Failed to create 3D task:", err);
+        }
+      }
     }
 
     if (currentStep < steps.length) {
@@ -82,161 +131,158 @@ function Tripo({ greetMsg }) {
     }
   };
 
-  const uploadToTripo = async (file) => {
-    console.log("File", file);
-    const formData = new FormData();
-    formData.append("file", file, "image.png");
-
-    const response = await fetch(
-      "https://api.tripo3d.ai/v2/openapi/upload/sts",
-      {
-        mode: "no-cors",
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_TRIPO_API_KEY}`,
-        },
-        body: formData,
-      }
-    );
-
-    const data = await response.json();
-    return data.data.image_token;
-  };
-
-  const trigger3DGeneration = async (imageToken) => {
-    const payload = {
-      type: "image_to_model",
-      file_token: imageToken,
-      model_version: "v2.5-20250123", // or "Turbo-v1.0-20250506"
-      orientation: "align_image",
-      texture: true,
-      pbr: true,
-      style: "object:steampunk", // Optional
-    };
-
-    const response = await fetch("https://api.tripo3d.ai/v2/openapi/task", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_TRIPO_API_KEY}`,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-    return data.task_id;
-  };
-
   return (
-    <Container
-      maxWidth="lg"
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-        marginBottom: 4,
-      }}
-    >
-      <Typography align="center" variant="h6" gutterBottom>
-        <GradientTxt txt={greetMsg} />
-      </Typography>
-
-      <Box className={styles.workflow_container}>
-        {steps.map((step) => (
-          <Box
-            key={step.number}
-            className={clsx(
-              styles.workflow_box,
-              currentStep === step.number && styles.gradient_border
-            )}
-          >
-            <Typography
-              variant="h6"
-              className={clsx(
-                styles.stepNumber,
-                currentStep === step.number && styles.gradient_border
-              )}
-            >
-              {step.number}
-            </Typography>
-            {step.number == 1 && (
-              <Step1
-                image={image}
-                setCurrentStep={setCurrentStep}
-                setImage={setImage}
-              />
-            )}
-            {step.number === 2 && (
-              <>
-                {isRemovingBg ? (
-                  <Box
-                    sx={{
-                      height: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      color: "var(--text-color)",
-                    }}
-                  >
-                    <Typography variant="body2">
-                      Removing background...
-                    </Typography>
-                  </Box>
-                ) : (
-                  bgRemovedImage && (
-                    <img
-                      src={bgRemovedImage}
-                      alt="Background removed"
-                      className={styles.selectedImage}
-                    />
-                  )
-                )}
-              </>
-            )}
-            {step.number === 3 && currentStep === 3 && (
-              <Box
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  color: "var(--text-color)",
-                }}
-              >
-                <Typography variant="body2">Model added to Queue...</Typography>
-              </Box>
-            )}
-          </Box>
-        ))}
-      </Box>
-
-      <Box
+    <>
+      <Container
+        maxWidth="lg"
         sx={{
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
         }}
       >
-        <Button
-          onClick={handleNextStep}
-          borderRadius={2}
-          pl={2}
-          pr={2}
-          sx={{ visibility: !image ? "hidden" : "visible" }}
-        >
-          <Typography>Next</Typography>
-        </Button>
-
-        <Typography align="center" variant="h5" gutterBottom>
-          <GradientTxt txt={steps[currentStep - 1].title} />
+        <Typography align="center" variant="h6" gutterBottom>
+          <GradientTxt txt={greetMsg} />
         </Typography>
-      </Box>
+      </Container>
 
-      <Typography align="center" variant="body1" color="var(--text-color)">
-        {steps[currentStep - 1].description}
-      </Typography>
-    </Container>
+      <Container
+        maxWidth="lg"
+        sx={{
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+        }}
+        className={styles.tripoContainer}
+      >
+        <Box className={styles.workflow_container}>
+          {steps.map((step) => (
+            <Box
+              key={step.number}
+              className={clsx(
+                styles.workflow_box,
+                currentStep === step.number && styles.gradient_border
+              )}
+            >
+              <Typography
+                variant="h6"
+                className={clsx(
+                  styles.stepNumber,
+                  currentStep === step.number && styles.gradient_border
+                )}
+              >
+                {step.number}
+              </Typography>
+              {step.number == 1 && (
+                <Step1
+                  image={image}
+                  setCurrentStep={setCurrentStep}
+                  setImage={setImage}
+                />
+              )}
+              {step.number === 2 && (
+                <>
+                  {isRemovingBg ? (
+                    <Box
+                      sx={{
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        color: "var(--text-color)",
+                      }}
+                    >
+                      <Typography variant="body2">
+                        Removing background...
+                      </Typography>
+                    </Box>
+                  ) : (
+                    bgRemovedImage && (
+                      <img
+                        src={bgRemovedImage}
+                        alt="Background removed"
+                        className={styles.selectedImage}
+                      />
+                    )
+                  )}
+                </>
+              )}
+              {step.number === 3 && currentStep === 3 && (
+                <Box
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 2,
+                    color: "var(--text-color)",
+                  }}
+                >
+                  <Typography variant="body2">
+                    {taskStatus
+                      ? `Status: ${taskStatus}`
+                      : "Model is queued... Please wait."}
+                  </Typography>
+
+                  {modelUrls && (
+                    <>
+                      <img
+                        src={modelUrls.rendered_image}
+                        alt="3D Preview"
+                        style={{ width: "200px", borderRadius: 8 }}
+                      />
+                      <a
+                        href={modelUrls.pbr_model}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "#7db3ff" }}
+                      >
+                        Download 3D Model
+                      </a>
+                    </>
+                  )}
+                </Box>
+              )}
+            </Box>
+          ))}
+        </Box>
+      </Container>
+
+      <Container
+        maxWidth="lg"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Button
+            onClick={handleNextStep}
+            borderRadius={2}
+            pl={2}
+            pr={2}
+            sx={{ visibility: !image ? "hidden" : "visible" }}
+          >
+            <Typography>Next</Typography>
+          </Button>
+
+          <Typography align="center" variant="h5">
+            <GradientTxt txt={steps[currentStep - 1].title} />
+          </Typography>
+        </Box>
+
+        <Typography align="center" variant="body1" color="var(--text-color)">
+          {steps[currentStep - 1].description}
+        </Typography>
+      </Container>
+    </>
   );
 }
 

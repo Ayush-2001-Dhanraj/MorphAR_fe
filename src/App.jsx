@@ -17,6 +17,7 @@ import ChatService from "./services/chatServices";
 import { updateAllChats } from "./redux/features/chat/chatSlice";
 import { getIsLoading, setIsLoading } from "./redux/features/app/appSlice";
 import LoadingOverlay from "./components/LoadingOverlay";
+import { ToastContainer, toast } from "react-toastify";
 
 // Layout Component that wraps all pages
 const Layout = () => (
@@ -88,12 +89,18 @@ function App() {
   }, [clerkUser]);
 
   useEffect(() => {
-    if (user) getAllChats(user);
+    if (user) {
+      toast(`Welcome ${user.name}!`);
+      getAllChats(user);
+    }
   }, [user]);
+
+  useEffect(() => toast("Welcome to Areisis!"), []);
   return (
     <>
       {isLoading && <LoadingOverlay />}
       <RouterProvider router={router} />
+      <ToastContainer />
     </>
   );
 }

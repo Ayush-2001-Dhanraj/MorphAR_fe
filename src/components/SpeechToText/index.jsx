@@ -6,6 +6,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import MicOffIcon from "@mui/icons-material/MicOff";
 import MicIcon from "@mui/icons-material/Mic";
 import Loader from "../Loading";
+import useSpeechRecognition from "../../hooks/useSpeechRecognition";
 
 const style = {
   position: "absolute",
@@ -24,38 +25,24 @@ const style = {
 };
 
 function SpeechToText({ open, handleClose, save }) {
-  const [listening, setListening] = useState(false);
   const [editableTranscript, setEditableTranscript] = useState("");
-
-  const { startListening, stopListening, transcript, reset } = useVoiceToText();
-
-  useEffect(() => {
-    if (listening) {
-      startListening();
-    } else {
-      stopListening();
-    }
-  }, [listening]);
-
-  const toggleListening = () => {
-    setListening((preV) => !preV);
-  };
+  const { text, isListening, startListening, stopListening } =
+    useSpeechRecognition();
 
   useEffect(() => {
-    setListening(open);
-    if (open) setEditableTranscript(""); // reset editable text when modal opens
+    if (open) startListening();
   }, [open]);
 
   useEffect(() => {
-    if (transcript.trim() !== "") {
-      setEditableTranscript((prev) => (prev + " " + transcript).trim());
-      reset(); // Clear to prevent duplicate additions
+    if (text.trim() !== "") {
+      setEditableTranscript((prev) => (prev + " " + text).trim());
     }
-  }, [transcript]);
+  }, [text]);
 
   return (
     <Modal
       open={open}
+      onClose={handleClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
@@ -64,7 +51,7 @@ function SpeechToText({ open, handleClose, save }) {
           sx={{
             display: "flex",
             justifyContent: "center",
-            visibility: listening ? "visible" : "hidden",
+            visibility: isListening ? "visible" : "hidden",
           }}
         >
           <Loader />
@@ -96,7 +83,7 @@ function SpeechToText({ open, handleClose, save }) {
         >
           <IconButton
             onClick={() => {
-              reset();
+              stopListening();
               handleClose();
             }}
             sx={{
@@ -106,12 +93,12 @@ function SpeechToText({ open, handleClose, save }) {
             <CloseIcon sx={{ color: "var(--text-color)" }} />
           </IconButton>
           <IconButton
-            onClick={toggleListening}
+            onClick={isListening ? stopListening : startListening}
             sx={{
               "&:hover": { backgroundColor: "var(--accent-color)" },
             }}
           >
-            {listening ? (
+            {isListening ? (
               <MicOffIcon sx={{ color: "var(--text-color)" }} />
             ) : (
               <MicIcon sx={{ color: "var(--text-color)" }} />
@@ -120,7 +107,6 @@ function SpeechToText({ open, handleClose, save }) {
           <IconButton
             onClick={() => {
               save(editableTranscript);
-              reset();
             }}
             sx={{
               "&:hover": { backgroundColor: "var(--accent-color)" },
