@@ -31,7 +31,12 @@ function Header() {
         sx={{ cursor: "pointer" }}
         onClick={handleNameClick}
       >
-        <GradientTxt txt="Areisis" />
+        <GradientTxt
+          txt="Areisis"
+          extraStyles={{
+            fontWeight: "bold",
+          }}
+        />
       </Typography>
       <SignedOut>
         <SignInButton mode="modal">
