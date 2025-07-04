@@ -1,11 +1,10 @@
 import { Box, Modal, IconButton, TextField } from "@mui/material";
-import React, { useState, useEffect } from "react";
-import { useVoiceToText } from "react-speakup";
+import { useState, useEffect } from "react";
 import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import MicOffIcon from "@mui/icons-material/MicOff";
 import MicIcon from "@mui/icons-material/Mic";
-import Loader from "../Loading";
+import ListeningIndicator from "../ListeningIndicator";
 import useSpeechRecognition from "../../hooks/useSpeechRecognition";
 
 const style = {
@@ -14,10 +13,7 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 400,
-  bgcolor: "var(--background-color)",
-  border: "2px solid var(--accent-color)",
   color: "var(--text-color)",
-  boxShadow: 24,
   p: 4,
   display: "flex",
   flexDirection: "column",
@@ -30,7 +26,12 @@ function SpeechToText({ open, handleClose, save }) {
     useSpeechRecognition();
 
   useEffect(() => {
+    console.log(open);
     if (open) startListening();
+    else {
+      setEditableTranscript("");
+      stopListening();
+    }
   }, [open]);
 
   useEffect(() => {
@@ -51,10 +52,9 @@ function SpeechToText({ open, handleClose, save }) {
           sx={{
             display: "flex",
             justifyContent: "center",
-            visibility: isListening ? "visible" : "hidden",
           }}
         >
-          <Loader />
+          <ListeningIndicator isListening={isListening} />
         </Box>
 
         <TextField
@@ -63,13 +63,15 @@ function SpeechToText({ open, handleClose, save }) {
           minRows={4}
           value={editableTranscript}
           onChange={(e) => setEditableTranscript(e.target.value)}
-          variant="outlined"
           sx={{
             "& .MuiInputBase-root": {
               color: "var(--text-color)",
             },
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "var(--accent-color)",
+            marginTop: 4,
+          }}
+          InputProps={{
+            inputProps: {
+              style: { textAlign: "center" },
             },
           }}
         />

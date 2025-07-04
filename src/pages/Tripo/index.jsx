@@ -34,18 +34,6 @@ function Tripo({ greetMsg }) {
       description:
         "Modelling is done in queue check Queue to see the actual status.",
     },
-    {
-      number: 3,
-      title: "Generate 3D Model in Queue",
-      description:
-        "Modelling is done in queue check Queue to see the actual status.",
-    },
-    {
-      number: 3,
-      title: "Generate 3D Model in Queue",
-      description:
-        "Modelling is done in queue check Queue to see the actual status.",
-    },
   ];
 
   useEffect(() => {

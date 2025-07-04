@@ -1,0 +1,83 @@
+.circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+}
+
+/* Static gradient circle when not listening */
+.circle.idle {
+    background: linear-gradient(74deg,
+            #4285f4 0,
+            #4285f4 9%,
+            #4285f4 20%,
+            #9b72cb 24%,
+            #9b72cb 35%,
+            #9b72cb 44%,
+            #9b72cb 50%,
+            #d96570 56%,
+            #d96570 75%,
+            #d96570 100%);
+}
+
+/* Base circle color (transparent) while listening */
+.circle.listening {
+    background-color: transparent;
+    border: 2px solid transparent;
+}
+
+/* Pulsing circles */
+.pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(74deg,
+            #4285f4 0,
+            #4285f4 9%,
+            #4285f4 20%,
+            #9b72cb 24%,
+            #9b72cb 35%,
+            #9b72cb 44%,
+            #9b72cb 50%,
+            #d96570 56%,
+            #d96570 75%,
+            #d96570 100%);
+    transform: translate(-50%, -50%);
+    animation: pulseAnim 1.5s infinite;
+    opacity: 0.6;
+    z-index: 1;
+}
+
+.pulse1 {
+    animation-delay: 0s;
+}
+
+.pulse2 {
+    animation-delay: 0.5s;
+}
+
+.pulse3 {
+    animation-delay: 1s;
+}
+
+/* Pulse animation */
+@keyframes pulseAnim {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.8);
+        opacity: 0.2;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(2.5);
+        opacity: 0;
+    }
+}
