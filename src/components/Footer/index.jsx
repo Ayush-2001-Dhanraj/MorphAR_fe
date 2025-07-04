@@ -7,19 +7,6 @@ import { Box, Divider, IconButton, Link, Typography } from "@mui/material";
 function Footer() {
   return (
     <Box className={styles.footer}>
-      <Box>
-        <Typography variant="subtitle1">
-          <Link
-            href="https://3d-portfolio-demo-delta.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            color="inherit"
-            underline="hover"
-          >
-            © {new Date().getFullYear()} @ ME, Myself and I
-          </Link>
-        </Typography>
-      </Box>
       <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
         <IconButton
           sx={{ color: "var(--secondary-color)" }}
@@ -54,7 +41,7 @@ function Footer() {
             color="inherit"
             underline="hover"
           >
-            Ayush Dhanraj
+            Ayush Dhanraj © {new Date().getFullYear()}
           </Link>
         </Typography>
       </Box>

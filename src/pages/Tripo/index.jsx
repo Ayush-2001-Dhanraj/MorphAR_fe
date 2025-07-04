@@ -6,7 +6,7 @@ import clsx from "clsx";
 import Step1 from "./Step1";
 import TripoService from "../../services/tripoServices";
 
-function Tripo({ greetMsg }) {
+function Tripo() {
   const [currentStep, setCurrentStep] = useState(1);
   const [image, setImage] = useState(null);
   const [bgRemovedImage, setBgRemovedImage] = useState(null);
@@ -121,18 +121,6 @@ function Tripo({ greetMsg }) {
 
   return (
     <>
-      <Container
-        maxWidth="lg"
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <Typography align="center" variant="h6" gutterBottom>
-          <GradientTxt txt={greetMsg} />
-        </Typography>
-      </Container>
-
       <Container
         maxWidth="lg"
         sx={{

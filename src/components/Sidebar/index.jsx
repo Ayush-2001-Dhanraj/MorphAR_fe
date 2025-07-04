@@ -8,7 +8,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
 import ImageIcon from "@mui/icons-material/Image";
 import { Box, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../../redux/features/user/userSlice";
 import {
@@ -18,6 +18,7 @@ import {
 } from "../../redux/features/chat/chatSlice";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ChatService from "../../services/chatServices";
+import { setGreetMsg } from "../../redux/features/app/appSlice";
 
 const drawerWidth = 240;
 
@@ -81,8 +82,29 @@ function SideBar() {
   const allChats = useSelector(getAllChats);
   const dispatch = useDispatch();
 
+  const location = useLocation();
+
+  useEffect(() => {
+    const pathname = location.pathname;
+
+    if (pathname === "/") {
+      if (!user) dispatch(setGreetMsg("Hello! Welcome to Areisis"));
+      else dispatch(setGreetMsg(`Namaste, ${user.name}!!!`));
+    } else if (pathname === "/tripo") {
+      dispatch(setGreetMsg("Let's get started with Tripo!"));
+    } else {
+      dispatch(setGreetMsg("Page not found, but you're still awesome!"));
+    }
+  }, [location, user]);
+
   const handleToggleDrawer = () => {
     setOpen((preV) => !preV);
+  };
+  const handleOpenDrawer = () => {
+    setOpen(true);
+  };
+  const handleCloseDrawer = () => {
+    setOpen(false);
   };
 
   const handleNewChat = () => {
@@ -118,8 +140,8 @@ function SideBar() {
           color: "var(--text-color)",
         },
       }}
-      onMouseEnter={handleToggleDrawer}
-      onMouseLeave={handleToggleDrawer}
+      onMouseEnter={handleOpenDrawer}
+      onMouseLeave={handleCloseDrawer}
     >
       <DrawerHeader>
         <IconButton onClick={handleToggleDrawer} sx={{ paddingLeft: 1.5 }}>
@@ -128,7 +150,7 @@ function SideBar() {
       </DrawerHeader>
       <Divider
         sx={{
-          borderBottomWidth: 5,
+          borderBottomWidth: 3,
           borderBottomColor: "var(--background-color)",
         }}
       />
@@ -175,14 +197,14 @@ function SideBar() {
               pl={1}
               color="var(--secondary-color)"
             >
-              Image to 3D Models
+              Image to 3D Model
             </Typography>
           )}
         </IconButton>
       </Box>
       <Divider
         sx={{
-          borderBottomWidth: 5,
+          borderBottomWidth: 3,
           borderBottomColor: "var(--background-color)",
         }}
       />

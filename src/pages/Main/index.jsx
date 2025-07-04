@@ -13,7 +13,6 @@ import ReactMarkdown from "react-markdown";
 import Loader from "../../components/Loading";
 import SpeechToText from "../../components/SpeechToText";
 import ImageViewer from "../../components/ImageViewer";
-import GradientTxt from "../../components/GradientTxt";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../../redux/features/user/userSlice";
 import {
@@ -22,11 +21,11 @@ import {
   updateChat,
 } from "../../redux/features/chat/chatSlice";
 import ChatService from "../../services/chatServices";
-import { setIsLoading } from "../../redux/features/app/appSlice";
 import { isImagePrompt } from "../../models/text_model";
 import { useClerk } from "@clerk/clerk-react";
+import { getGreetMsg, setIsLoading } from "../../redux/features/app/appSlice";
 
-function Main({ greetMsg }) {
+function Main() {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -97,9 +96,11 @@ function Main({ greetMsg }) {
     dispatch(updateAllChats(response));
   };
 
-  const getChatHistory = async (chat_id) => {
+  const getChatHistory = async (chat_id, reload = false) => {
+    if (reload) dispatch(setIsLoading(true));
     const result = await ChatService.getChat(chat_id);
     setHistory(result.chat_history);
+    dispatch(setIsLoading(false));
   };
 
   const scrollToBottom = () => {
@@ -136,18 +137,15 @@ function Main({ greetMsg }) {
 
   useEffect(() => {
     if (currentChat) {
-      getChatHistory(currentChat);
+      getChatHistory(currentChat, true);
     } else {
       setHistory([]);
     }
   }, [currentChat]);
 
   const renderHistory = useMemo(() => {
-    return history.length === 0 ? (
-      <Typography variant="h6" align="center">
-        <GradientTxt txt={user ? `Namaste, ${user.name}!!!` : greetMsg} />
-      </Typography>
-    ) : (
+    return (
+      history.length !== 0 &&
       history.map((entry, index) => (
         <Box
           key={index}
@@ -289,6 +287,7 @@ function Main({ greetMsg }) {
             alignItems: "center",
             borderRadius: 8,
             gap: 1,
+            marginBottom: 2.5,
           }}
           pl={2}
           pr={2}

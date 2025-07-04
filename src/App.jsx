@@ -1,12 +1,17 @@
 // App.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Footer from "./components/Footer";
 import Main from "./pages/Main";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import SideBar from "./components/Sidebar";
 import styles from "./App.module.css";
 import Tripo from "./pages/Tripo";
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Outlet,
+  useLocation,
+} from "react-router-dom";
 import Header from "./components/Header";
 import NotFound from "./pages/NotFound";
 import { useUser } from "@clerk/clerk-react";
@@ -14,25 +19,44 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUser, updateUser } from "./redux/features/user/userSlice";
 import UserService from "./services/userServices";
 import ChatService from "./services/chatServices";
-import { updateAllChats } from "./redux/features/chat/chatSlice";
-import { getIsLoading, setIsLoading } from "./redux/features/app/appSlice";
+import {
+  getCurrentChat,
+  updateAllChats,
+} from "./redux/features/chat/chatSlice";
+import {
+  getGreetMsg,
+  getIsLoading,
+  setGreetMsg,
+  setIsLoading,
+} from "./redux/features/app/appSlice";
 import LoadingOverlay from "./components/LoadingOverlay";
 import { ToastContainer, toast } from "react-toastify";
+import GradientTxt from "./components/GradientTxt";
 
 // Layout Component that wraps all pages
-const Layout = () => (
-  <>
-    <Box className={styles.mainContainer}>
-      <SideBar />
-      <Box className={styles.main} pr={2} pl={2}>
-        <Header />
-        <Outlet />
-      </Box>
-    </Box>
+const Layout = () => {
+  const greetMsg = useSelector(getGreetMsg);
+  const currentChat = useSelector(getCurrentChat);
+  return (
+    <>
+      <Box className={styles.mainContainer}>
+        <SideBar />
+        <Box className={styles.main} pr={2} pl={2}>
+          <Header />
+          {!currentChat && (
+            <Typography variant="h6" align="center">
+              <GradientTxt txt={greetMsg} />
+            </Typography>
+          )}
 
-    <Footer />
-  </>
-);
+          <Outlet />
+        </Box>
+      </Box>
+
+      <Footer />
+    </>
+  );
+};
 
 const router = createBrowserRouter([
   {
@@ -41,13 +65,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <Main greetMsg="Hello, Dev" />,
+        element: <Main />,
       },
       {
         path: "tripo",
-        element: (
-          <Tripo greetMsg="Hello, 3D Dev let's create a 3D model in minutes." />
-        ),
+        element: <Tripo />,
       },
       {
         path: "*", // Catch-all route for 404
@@ -95,7 +117,6 @@ function App() {
     }
   }, [user]);
 
-  useEffect(() => toast("Welcome to Areisis!"), []);
   return (
     <>
       {isLoading && <LoadingOverlay />}

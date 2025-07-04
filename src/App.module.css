@@ -1,9 +1,9 @@
 .mainContainer {
-    flex: 1;
     display: flex;
     position: relative;
     background-color: var(--background-color);
     overflow-x: hidden;
+    flex: 1
 }
 
 .main {
