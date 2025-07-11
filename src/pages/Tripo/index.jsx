@@ -10,7 +10,8 @@ function Tripo() {
   const [currentStep, setCurrentStep] = useState(1);
   const [image, setImage] = useState(null);
   const [bgRemovedImage, setBgRemovedImage] = useState(null);
-  const [isRemovingBg, setIsRemovingBg] = useState(false); // Optional loading indicator
+  const [isRemovingBg, setIsRemovingBg] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const [taskId, setTaskId] = useState(null);
   const [taskStatus, setTaskStatus] = useState(null);
   const [modelUrls, setModelUrls] = useState(null);
@@ -39,10 +40,11 @@ function Tripo() {
   useEffect(() => {
     if (!taskId) return;
 
+    setDisabled(true);
     const interval = setInterval(async () => {
       try {
         const data = await TripoService.getTaskStatus(taskId);
-        console.log("Task status:", data.status);
+        console.log("Task status:", data.task.status);
         setTaskStatus(data.task.status);
 
         if (data.task.status === "success") {
@@ -60,6 +62,7 @@ function Tripo() {
       }
     }, 4000); // poll every 4 seconds
 
+    setDisabled(false);
     return () => clearInterval(interval); // cleanup on unmount
   }, [taskId]);
 
@@ -244,13 +247,16 @@ function Tripo() {
             borderRadius={2}
             pl={2}
             pr={2}
-            sx={{ visibility: !image ? "hidden" : "visible" }}
+            sx={{
+              visibility:
+                !image || isRemovingBg || disabled ? "hidden" : "visible",
+            }}
           >
             <Typography>Next</Typography>
           </Button>
 
           <Typography align="center" variant="h5">
-            <GradientTxt txt={steps[currentStep - 1].title} />
+            <GradientTxt txt={steps[currentStep - 1]?.title} />
           </Typography>
         </Box>
 

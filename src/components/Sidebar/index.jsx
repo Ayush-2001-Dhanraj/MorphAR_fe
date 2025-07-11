@@ -11,6 +11,8 @@ import { Box, Typography } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../../redux/features/user/userSlice";
+import AudiotrackIcon from "@mui/icons-material/Audiotrack";
+import GestureIcon from "@mui/icons-material/Gesture";
 import {
   getAllChats,
   updateAllChats,
@@ -88,10 +90,14 @@ function SideBar() {
     const pathname = location.pathname;
 
     if (pathname === "/") {
-      if (!user) dispatch(setGreetMsg("Hello! Welcome to Areisis"));
+      if (!user) dispatch(setGreetMsg("Hello! Welcome to MorphAR"));
       else dispatch(setGreetMsg(`Namaste, ${user.name}!!!`));
     } else if (pathname === "/tripo") {
-      dispatch(setGreetMsg("Let's get started with Tripo!"));
+      dispatch(setGreetMsg("Let's get started with Tripo! Image to 3D Model"));
+    } else if (pathname === "/text") {
+      dispatch(setGreetMsg("Text/Audio to 3D Model"));
+    } else if (pathname === "/sketch") {
+      dispatch(setGreetMsg("Sketch to 3D Model"));
     } else {
       dispatch(setGreetMsg("Page not found, but you're still awesome!"));
     }
@@ -114,6 +120,14 @@ function SideBar() {
 
   const handleClickImgTo3D = () => {
     navigate("/tripo");
+  };
+
+  const handleClickTextAudioTo3D = () => {
+    navigate("/text");
+  };
+
+  const handleClickSketchTo3D = () => {
+    navigate("/sketch");
   };
 
   const handleClickChat = (chat_id) => {
@@ -198,6 +212,52 @@ function SideBar() {
               color="var(--secondary-color)"
             >
               Image to 3D Model
+            </Typography>
+          )}
+        </IconButton>
+        <IconButton
+          onClick={handleClickTextAudioTo3D}
+          sx={{
+            backgroundColor: "var(--background-color)",
+            borderRadius: open ? 4 : 50,
+            display: "inherit",
+            justifyContent: "flex-start",
+            "&:hover": {
+              backgroundColor: "var(--background-color)",
+            },
+          }}
+        >
+          <AudiotrackIcon sx={{ color: "var(--secondary-color)" }} />
+          {open && (
+            <Typography
+              variant="subtitle2"
+              pl={1}
+              color="var(--secondary-color)"
+            >
+              Text/Audio to 3D Model
+            </Typography>
+          )}
+        </IconButton>
+        <IconButton
+          onClick={handleClickSketchTo3D}
+          sx={{
+            backgroundColor: "var(--background-color)",
+            borderRadius: open ? 4 : 50,
+            display: "inherit",
+            justifyContent: "flex-start",
+            "&:hover": {
+              backgroundColor: "var(--background-color)",
+            },
+          }}
+        >
+          <GestureIcon sx={{ color: "var(--secondary-color)" }} />
+          {open && (
+            <Typography
+              variant="subtitle2"
+              pl={1}
+              color="var(--secondary-color)"
+            >
+              Sketch to 3D Model
             </Typography>
           )}
         </IconButton>

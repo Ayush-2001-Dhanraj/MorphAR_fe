@@ -6,12 +6,8 @@ import { Box, Typography } from "@mui/material";
 import SideBar from "./components/Sidebar";
 import styles from "./App.module.css";
 import Tripo from "./pages/Tripo";
-import {
-  createBrowserRouter,
-  RouterProvider,
-  Outlet,
-  useLocation,
-} from "react-router-dom";
+import AudioToModel from "./pages/AudioToModel";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import Header from "./components/Header";
 import NotFound from "./pages/NotFound";
 import { useUser } from "@clerk/clerk-react";
@@ -26,12 +22,12 @@ import {
 import {
   getGreetMsg,
   getIsLoading,
-  setGreetMsg,
   setIsLoading,
 } from "./redux/features/app/appSlice";
 import LoadingOverlay from "./components/LoadingOverlay";
 import { ToastContainer, toast } from "react-toastify";
 import GradientTxt from "./components/GradientTxt";
+import Sketch from "./pages/Sketch";
 
 // Layout Component that wraps all pages
 const Layout = () => {
@@ -70,6 +66,14 @@ const router = createBrowserRouter([
       {
         path: "tripo",
         element: <Tripo />,
+      },
+      {
+        path: "text",
+        element: <AudioToModel />,
+      },
+      {
+        path: "sketch",
+        element: <Sketch />,
       },
       {
         path: "*", // Catch-all route for 404

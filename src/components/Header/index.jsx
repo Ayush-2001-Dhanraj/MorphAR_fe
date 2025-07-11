@@ -32,7 +32,7 @@ function Header() {
         onClick={handleNameClick}
       >
         <GradientTxt
-          txt="Areisis"
+          txt="MorphAR"
           extraStyles={{
             fontWeight: "bold",
           }}

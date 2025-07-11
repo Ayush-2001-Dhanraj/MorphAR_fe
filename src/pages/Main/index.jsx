@@ -23,7 +23,7 @@ import {
 import ChatService from "../../services/chatServices";
 import { isImagePrompt } from "../../models/text_model";
 import { useClerk } from "@clerk/clerk-react";
-import { getGreetMsg, setIsLoading } from "../../redux/features/app/appSlice";
+import { setIsLoading } from "../../redux/features/app/appSlice";
 
 function Main() {
   const [input, setInput] = useState("");
