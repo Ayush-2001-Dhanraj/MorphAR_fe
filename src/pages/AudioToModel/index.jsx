@@ -172,10 +172,6 @@ function AudioToModel() {
     }
   };
 
-  useEffect(() => {
-    console.log(image);
-  }, [image]);
-
   return (
     <>
       <Container

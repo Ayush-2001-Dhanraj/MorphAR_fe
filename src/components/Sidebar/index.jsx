@@ -97,7 +97,7 @@ function SideBar() {
     } else if (pathname === "/text") {
       dispatch(setGreetMsg("Text/Audio to 3D Model"));
     } else if (pathname === "/sketch") {
-      dispatch(setGreetMsg("Sketch to 3D Model"));
+      dispatch(setGreetMsg("Sketch your 3D Model"));
     } else {
       dispatch(setGreetMsg("Page not found, but you're still awesome!"));
     }
@@ -257,7 +257,7 @@ function SideBar() {
               pl={1}
               color="var(--secondary-color)"
             >
-              Sketch to 3D Model
+              Sketch your 3D Model
             </Typography>
           )}
         </IconButton>
