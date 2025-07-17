@@ -98,6 +98,8 @@ function SideBar() {
       dispatch(setGreetMsg("Text/Audio to 3D Model"));
     } else if (pathname === "/sketch") {
       dispatch(setGreetMsg("Sketch your 3D Model"));
+    } else if (pathname === "/view") {
+      dispatch(setGreetMsg("Visualize your 3D Model"));
     } else {
       dispatch(setGreetMsg("Page not found, but you're still awesome!"));
     }

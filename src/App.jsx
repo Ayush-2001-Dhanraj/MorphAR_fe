@@ -28,6 +28,7 @@ import LoadingOverlay from "./components/LoadingOverlay";
 import { ToastContainer, toast } from "react-toastify";
 import GradientTxt from "./components/GradientTxt";
 import Sketch from "./pages/Sketch";
+import ViewModel from "./pages/ViewModel";
 
 // Layout Component that wraps all pages
 const Layout = () => {
@@ -74,6 +75,10 @@ const router = createBrowserRouter([
       {
         path: "sketch",
         element: <Sketch />,
+      },
+      {
+        path: "view",
+        element: <ViewModel />,
       },
       {
         path: "*", // Catch-all route for 404
