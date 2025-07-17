@@ -1,12 +1,26 @@
 import React, { useEffect, useState } from "react";
 import TripoService from "../../services/tripoServices";
 import styles from "./AudioToModel.module.css";
-import { Box, Button, Container, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Container,
+  IconButton,
+  TextField,
+  Typography,
+} from "@mui/material";
 import clsx from "clsx";
 import GradientTxt from "../../components/GradientTxt";
 import useSpeechRecognition from "../../hooks/useSpeechRecognition";
 import ListeningIndicator from "../../components/ListeningIndicator";
 import models from "../../models";
+import { toast } from "react-toastify";
+import ViewInArIcon from "@mui/icons-material/ViewInAr";
+import DownloadIcon from "@mui/icons-material/Download";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { useDispatch } from "react-redux";
+import { setModelLink } from "../../redux/features/app/appSlice";
+import { useNavigate } from "react-router";
 
 function AudioToModel() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -17,6 +31,9 @@ function AudioToModel() {
   const [taskStatus, setTaskStatus] = useState(null);
   const [modelUrls, setModelUrls] = useState(null);
   const [isRemovingBg, setIsRemovingBg] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [editableTranscript, setEditableTranscript] = useState("");
   const { text, isListening, startListening, stopListening } =
@@ -88,16 +105,11 @@ function AudioToModel() {
   };
 
   const handleNextStep = async () => {
+    setDisabled(true);
     if (currentStep === 1) {
       const imagePrompt = `"${editableTranscript}"Generate a realistic image of the described object in 300x300 pixels, with a plain white background. The image must not include any text, watermark, or label. Do not provide any description or response—only return the image.`;
-
       const history = [];
       const response = await models.text(history, imagePrompt, true);
-      console.log("text history", history);
-      console.log(
-        "text history",
-        history[1].parts[history[1].parts.length - 1]
-      );
       setImage(history[1].parts[history[1].parts.length - 1].inlineData);
     }
 
@@ -141,6 +153,8 @@ function AudioToModel() {
     if (currentStep < steps.length) {
       setCurrentStep((prev) => prev + 1);
     }
+
+    setDisabled(false);
   };
 
   const removeBackground = async (imageFile, setIsLoading) => {
@@ -170,6 +184,46 @@ function AudioToModel() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDownloadModel = () => {
+    const link = document.createElement("a");
+    link.href = modelUrls.pbr_model;
+    link.download = "3d-model.glb";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast("Model send for download!");
+  };
+
+  const handleCopyToClipboard = () => {
+    navigator.clipboard.writeText(modelUrls.pbr_model);
+    toast("Model Link Copied!");
+  };
+
+  const handleGotoViewModel = () => {
+    toast("Redirecting to View Model!");
+    navigator.clipboard.writeText(modelUrls.pbr_model);
+
+    setTimeout(() => {
+      dispatch(setModelLink(modelUrls.pbr_model));
+      navigate("/view");
+    }, 1000);
+  };
+
+  const handleReset = () => {
+    setCurrentStep(1);
+    setImage(null);
+    setBgRemovedImage(null);
+    setIsRemovingBg(false);
+    setDisabled(false);
+    setTaskId(null);
+    setTaskStatus(null);
+    setModelUrls(null);
+  };
+
+  const handleBack = () => {
+    setCurrentStep((preV) => preV - 1);
   };
 
   return (
@@ -218,7 +272,7 @@ function AudioToModel() {
                         <ListeningIndicator isListening={isListening} />
                       </Button>
                     </Box>
-                    {currentStep !== 1 ? (
+                    {currentStep !== 1 || disabled ? (
                       <Typography
                         sx={{
                           paddingLeft: 2,
@@ -310,18 +364,72 @@ function AudioToModel() {
                     {modelUrls && (
                       <>
                         <img
-                          src={modelUrls.rendered_image}
+                          src={modelUrls?.rendered_image}
                           alt="3D Preview"
                           style={{ width: "200px", borderRadius: 8 }}
                         />
-                        <a
-                          href={modelUrls.pbr_model}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ color: "#7db3ff" }}
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: 5,
+                            mt: 2,
+                            position: "absolute",
+                            bottom: 5,
+                          }}
                         >
-                          Download 3D Model
-                        </a>
+                          <IconButton
+                            onClick={handleDownloadModel}
+                            sx={{
+                              backgroundColor: "var(--background-color)",
+                              borderRadius: 50,
+                              display: "inherit",
+                              justifyContent: "flex-start",
+                              "&:hover": {
+                                backgroundColor: "var(--background-color)",
+                              },
+                            }}
+                          >
+                            <DownloadIcon
+                              fontSize="small"
+                              sx={{ color: "var(--secondary-color)" }}
+                            />
+                          </IconButton>
+                          <IconButton
+                            onClick={handleCopyToClipboard}
+                            sx={{
+                              backgroundColor: "var(--background-color)",
+                              borderRadius: 50,
+                              display: "inherit",
+                              justifyContent: "flex-start",
+                              "&:hover": {
+                                backgroundColor: "var(--background-color)",
+                              },
+                            }}
+                          >
+                            <ContentCopyIcon
+                              fontSize="small"
+                              sx={{ color: "var(--secondary-color)" }}
+                            />
+                          </IconButton>
+                          <IconButton
+                            onClick={handleGotoViewModel}
+                            sx={{
+                              backgroundColor: "var(--background-color)",
+                              borderRadius: 50,
+                              display: "inherit",
+                              justifyContent: "flex-start",
+                              "&:hover": {
+                                backgroundColor: "var(--background-color)",
+                              },
+                            }}
+                          >
+                            <ViewInArIcon
+                              sx={{ color: "var(--secondary-color)" }}
+                              fontSize="small"
+                            />
+                          </IconButton>
+                        </Box>
                       </>
                     )}
                   </Box>
@@ -347,17 +455,31 @@ function AudioToModel() {
             alignItems: "center",
           }}
         >
-          <Button
-            onClick={handleNextStep}
-            borderRadius={2}
-            pl={2}
-            pr={2}
+          <Box
             sx={{
+              display: "flex",
               visibility: isRemovingBg || disabled ? "hidden" : "visible",
+              gap: 20,
             }}
           >
-            <Typography>Next</Typography>
-          </Button>
+            {currentStep === steps.length && (
+              <Button onClick={handleReset} borderRadius={2} pl={2} pr={2}>
+                <Typography>Reset</Typography>
+              </Button>
+            )}
+
+            {currentStep !== 1 && currentStep !== steps.length && (
+              <Button onClick={handleBack} borderRadius={2} pl={2} pr={2}>
+                <Typography>Back</Typography>
+              </Button>
+            )}
+
+            {currentStep !== steps.length && (
+              <Button onClick={handleNextStep} borderRadius={2} pl={2} pr={2}>
+                <Typography>Next</Typography>
+              </Button>
+            )}
+          </Box>
 
           <Typography align="center" variant="h5">
             <GradientTxt txt={steps[currentStep - 1]?.title} />

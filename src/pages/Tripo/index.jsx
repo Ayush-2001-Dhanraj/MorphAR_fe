@@ -106,11 +106,12 @@ function Tripo() {
     setDisabled(false);
   };
 
-  const removeBackground = async (imageFile) => {
+  const removeBackground = async (imageFile, setIsLoading) => {
     const formData = new FormData();
     formData.append("image_file", imageFile);
     formData.append("size", "auto");
 
+    setIsLoading(true);
     try {
       const response = await fetch("https://api.remove.bg/v1.0/removebg", {
         method: "POST",
@@ -129,6 +130,8 @@ function Tripo() {
     } catch (err) {
       console.error(err);
       return null;
+    } finally {
+      setIsLoading(false);
     }
   };
 
