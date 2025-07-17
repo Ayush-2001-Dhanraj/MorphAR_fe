@@ -20,7 +20,7 @@ import {
 } from "../../redux/features/chat/chatSlice";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ChatService from "../../services/chatServices";
-import { setGreetMsg } from "../../redux/features/app/appSlice";
+import { setGreetMsg, setModelLink } from "../../redux/features/app/appSlice";
 import ViewInArIcon from "@mui/icons-material/ViewInAr";
 
 const drawerWidth = 240;
@@ -103,6 +103,10 @@ function SideBar() {
       dispatch(setGreetMsg("Visualize your 3D Model"));
     } else {
       dispatch(setGreetMsg("Page not found, but you're still awesome!"));
+    }
+
+    if (pathname !== "/view") {
+      dispatch(setModelLink(""));
     }
   }, [location, user]);
 

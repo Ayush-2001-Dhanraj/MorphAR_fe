@@ -8,6 +8,10 @@ import TripoService from "../../services/tripoServices";
 import ViewInArIcon from "@mui/icons-material/ViewInAr";
 import DownloadIcon from "@mui/icons-material/Download";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
+import { setModelLink } from "../../redux/features/app/appSlice";
+import { toast } from "react-toastify";
 
 function Tripo() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -18,6 +22,9 @@ function Tripo() {
   const [taskId, setTaskId] = useState(null);
   const [taskStatus, setTaskStatus] = useState(null);
   const [modelUrls, setModelUrls] = useState(null);
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const steps = [
     {
@@ -70,6 +77,7 @@ function Tripo() {
   }, [taskId]);
 
   const handleNextStep = async () => {
+    setDisabled(true);
     if (currentStep === 1 && image) {
       const result = await removeBackground(image, setIsRemovingBg);
       if (result) {
@@ -94,14 +102,15 @@ function Tripo() {
     if (currentStep < steps.length) {
       setCurrentStep((prev) => prev + 1);
     }
+
+    setDisabled(false);
   };
 
-  const removeBackground = async (imageFile, setIsLoading) => {
+  const removeBackground = async (imageFile) => {
     const formData = new FormData();
     formData.append("image_file", imageFile);
     formData.append("size", "auto");
 
-    setIsLoading(true);
     try {
       const response = await fetch("https://api.remove.bg/v1.0/removebg", {
         method: "POST",
@@ -120,8 +129,6 @@ function Tripo() {
     } catch (err) {
       console.error(err);
       return null;
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -132,13 +139,34 @@ function Tripo() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast("Model send for download!");
   };
 
   const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(modelUrls.pbr_model);
+    toast("Model Link Copied!");
   };
 
-  const handleGotoViewModel = () => {};
+  const handleGotoViewModel = () => {
+    toast("Redirecting to View Model!");
+    navigator.clipboard.writeText(modelUrls.pbr_model);
+
+    setTimeout(() => {
+      dispatch(setModelLink(modelUrls.pbr_model));
+      navigate("/view");
+    }, 1000);
+  };
+
+  const handleReset = () => {
+    setCurrentStep(1);
+    setImage(null);
+    setBgRemovedImage(null);
+    setIsRemovingBg(false);
+    setDisabled(false);
+    setTaskId(null);
+    setTaskStatus(null);
+    setModelUrls(null);
+  };
 
   return (
     <>
@@ -229,7 +257,15 @@ function Tripo() {
                         style={{ width: "200px", borderRadius: 8 }}
                       />
 
-                      <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 5,
+                          mt: 2,
+                          position: "absolute",
+                          bottom: 5,
+                        }}
+                      >
                         <IconButton
                           onClick={handleDownloadModel}
                           sx={{
@@ -243,6 +279,7 @@ function Tripo() {
                           }}
                         >
                           <DownloadIcon
+                            fontSize="small"
                             sx={{ color: "var(--secondary-color)" }}
                           />
                         </IconButton>
@@ -259,6 +296,7 @@ function Tripo() {
                           }}
                         >
                           <ContentCopyIcon
+                            fontSize="small"
                             sx={{ color: "var(--secondary-color)" }}
                           />
                         </IconButton>
@@ -276,6 +314,7 @@ function Tripo() {
                         >
                           <ViewInArIcon
                             sx={{ color: "var(--secondary-color)" }}
+                            fontSize="small"
                           />
                         </IconButton>
                       </Box>
@@ -310,11 +349,22 @@ function Tripo() {
             pr={2}
             sx={{
               visibility:
-                !image || isRemovingBg || disabled ? "hidden" : "visible",
+                !image ||
+                isRemovingBg ||
+                disabled ||
+                currentStep === steps.length
+                  ? "hidden"
+                  : "visible",
             }}
           >
             <Typography>Next</Typography>
           </Button>
+
+          {currentStep === steps.length && (
+            <Button onClick={handleReset} borderRadius={2} pl={2} pr={2}>
+              <Typography>Reset</Typography>
+            </Button>
+          )}
 
           <Typography align="center" variant="h5">
             <GradientTxt txt={steps[currentStep - 1]?.title} />

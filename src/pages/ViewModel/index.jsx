@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Environment, Html } from "@react-three/drei";
 import {
@@ -10,6 +10,8 @@ import {
   Alert,
 } from "@mui/material";
 import GradientTxt from "../../components/GradientTxt";
+import { useSelector } from "react-redux";
+import { getModelLink } from "../../redux/features/app/appSlice";
 
 function Model({ modelUrl }) {
   const gltf = useGLTF(modelUrl);
@@ -59,6 +61,8 @@ const ViewModel = ({ isOpen, handleClose }) => {
   const [modelSource, setModelSource] = useState(null);
   const fileInputRef = useRef();
 
+  const modelLink = useSelector(getModelLink);
+
   const isValidModelUrl = (url) => {
     try {
       const parsed = new URL(url);
@@ -96,6 +100,15 @@ const ViewModel = ({ isOpen, handleClose }) => {
     setLocalModel(null);
     setUrlError("");
   };
+
+  useEffect(() => {
+    if (modelLink) {
+      setUrlInput(modelLink);
+      setTimeout(() => {
+        handleUrlSubmit();
+      }, 0);
+    }
+  }, [modelLink]);
 
   return (
     <Box
