@@ -1,10 +1,13 @@
-import { Box, Button, Container, Typography } from "@mui/material";
+import { Box, Button, Container, IconButton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import GradientTxt from "../../components/GradientTxt";
 import styles from "./Tripo.module.css";
 import clsx from "clsx";
 import Step1 from "./Step1";
 import TripoService from "../../services/tripoServices";
+import ViewInArIcon from "@mui/icons-material/ViewInAr";
+import DownloadIcon from "@mui/icons-material/Download";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 function Tripo() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -122,6 +125,21 @@ function Tripo() {
     }
   };
 
+  const handleDownloadModel = () => {
+    const link = document.createElement("a");
+    link.href = modelUrls.pbr_model;
+    link.download = "3d-model.glb"; // adjust extension if needed
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleCopyToClipboard = () => {
+    navigator.clipboard.writeText(modelUrls.pbr_model);
+  };
+
+  const handleGotoViewModel = () => {};
+
   return (
     <>
       <Container
@@ -206,18 +224,61 @@ function Tripo() {
                   {modelUrls && (
                     <>
                       <img
-                        src={modelUrls.rendered_image}
+                        src={modelUrls?.rendered_image}
                         alt="3D Preview"
                         style={{ width: "200px", borderRadius: 8 }}
                       />
-                      <a
-                        href={modelUrls.pbr_model}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "#7db3ff" }}
-                      >
-                        Download 3D Model
-                      </a>
+
+                      <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                        <IconButton
+                          onClick={handleDownloadModel}
+                          sx={{
+                            backgroundColor: "var(--background-color)",
+                            borderRadius: 50,
+                            display: "inherit",
+                            justifyContent: "flex-start",
+                            "&:hover": {
+                              backgroundColor: "var(--background-color)",
+                            },
+                          }}
+                        >
+                          <DownloadIcon
+                            sx={{ color: "var(--secondary-color)" }}
+                          />
+                        </IconButton>
+                        <IconButton
+                          onClick={handleCopyToClipboard}
+                          sx={{
+                            backgroundColor: "var(--background-color)",
+                            borderRadius: 50,
+                            display: "inherit",
+                            justifyContent: "flex-start",
+                            "&:hover": {
+                              backgroundColor: "var(--background-color)",
+                            },
+                          }}
+                        >
+                          <ContentCopyIcon
+                            sx={{ color: "var(--secondary-color)" }}
+                          />
+                        </IconButton>
+                        <IconButton
+                          onClick={handleGotoViewModel}
+                          sx={{
+                            backgroundColor: "var(--background-color)",
+                            borderRadius: 50,
+                            display: "inherit",
+                            justifyContent: "flex-start",
+                            "&:hover": {
+                              backgroundColor: "var(--background-color)",
+                            },
+                          }}
+                        >
+                          <ViewInArIcon
+                            sx={{ color: "var(--secondary-color)" }}
+                          />
+                        </IconButton>
+                      </Box>
                     </>
                   )}
                 </Box>

@@ -21,6 +21,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import ChatService from "../../services/chatServices";
 import { setGreetMsg } from "../../redux/features/app/appSlice";
+import ViewInArIcon from "@mui/icons-material/ViewInAr";
 
 const drawerWidth = 240;
 
@@ -120,6 +121,10 @@ function SideBar() {
     navigate("/");
   };
 
+  const handleClickViewModel = () => {
+    navigate("/view");
+  };
+
   const handleClickImgTo3D = () => {
     navigate("/tripo");
   };
@@ -191,6 +196,29 @@ function SideBar() {
               color="var(--secondary-color)"
             >
               New Chat
+            </Typography>
+          )}
+        </IconButton>
+        <IconButton
+          onClick={handleClickViewModel}
+          sx={{
+            backgroundColor: "var(--background-color)",
+            borderRadius: open ? 4 : 50,
+            display: "inherit",
+            justifyContent: "flex-start",
+            "&:hover": {
+              backgroundColor: "var(--background-color)",
+            },
+          }}
+        >
+          <ViewInArIcon sx={{ color: "var(--secondary-color)" }} />
+          {open && (
+            <Typography
+              variant="subtitle2"
+              pl={1}
+              color="var(--secondary-color)"
+            >
+              View Your 3D Model
             </Typography>
           )}
         </IconButton>

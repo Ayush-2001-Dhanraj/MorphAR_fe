@@ -62,9 +62,10 @@ const ViewModel = ({ isOpen, handleClose }) => {
   const isValidModelUrl = (url) => {
     try {
       const parsed = new URL(url);
+      const pathname = parsed.pathname.toLowerCase();
       return (
         parsed.protocol.startsWith("http") &&
-        (url.endsWith(".glb") || url.endsWith(".gltf"))
+        (pathname.endsWith(".glb") || pathname.endsWith(".gltf"))
       );
     } catch {
       return false;
@@ -162,7 +163,7 @@ const ViewModel = ({ isOpen, handleClose }) => {
         {/* Error Message */}
         {urlError && <Alert severity="error">{urlError}</Alert>}
 
-        <Typography align="center" variant="h6">
+        <Typography align="center">
           <GradientTxt txt={"Select your Model or paste its URL"} />
         </Typography>
       </Stack>
