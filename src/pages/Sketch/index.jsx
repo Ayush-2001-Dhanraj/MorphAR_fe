@@ -13,7 +13,14 @@ import {
 import GradientTxt from "../../components/GradientTxt";
 import GestureIcon from "@mui/icons-material/Gesture";
 import DrawingBoard from "../../components/DrawingBoard";
+import ViewInArIcon from "@mui/icons-material/ViewInAr";
+import DownloadIcon from "@mui/icons-material/Download";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import models from "../../models";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
+import { setModelLink } from "../../redux/features/app/appSlice";
 
 function Sketch() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -26,6 +33,9 @@ function Sketch() {
   const [isRemovingBg, setIsRemovingBg] = useState(false);
   const [editableTranscript, setEditableTranscript] = useState("");
   const [openDrawingBoard, setOpenDrawingBoard] = useState(false);
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch;
 
   const steps = [
     {
@@ -87,6 +97,7 @@ function Sketch() {
   }, [taskId]);
 
   const handleNextStep = async () => {
+    setDisabled(true);
     if (currentStep === 2) {
       const imagePrompt = `"${editableTranscript}"Generate a realistic image of the described object in 300x300 pixels, with a plain white background. The image must not include any text, watermark, or label. Do not provide any description or response—only return the image.`;
 
@@ -140,6 +151,8 @@ function Sketch() {
     if (currentStep < steps.length) {
       setCurrentStep((prev) => prev + 1);
     }
+
+    setDisabled(false);
   };
 
   const removeBackground = async (imageFile, setIsLoading) => {
@@ -177,11 +190,8 @@ function Sketch() {
 
     const base64 = imageDataUrl.replace(/^data:image\/png;base64,/, "");
 
-    const prompt = `This is a user-drawn sketch. 
-Describe what the user has drawn in 1 short phrase. 
-Do not add any explanation, text, or context. 
-Only return the object name or type (e.g. "a horse", "a rocket", "nothing"). 
-If you cannot recognize the object, respond with "nothing".`;
+    const prompt =
+      'This is a user-drawn sketch. Describe what the user has drawn in 1 short phrase. Do not add any explanation, text, or context. Only return the object name or type (e.g. "a horse", "a rocket", "nothing"). If you cannot recognize the object, respond with "nothing".';
 
     const history = [
       {
@@ -200,7 +210,6 @@ If you cannot recognize the object, respond with "nothing".`;
 
     try {
       const response = await models.text(history, prompt, true);
-      console.log(history);
 
       // Gemini will respond with a model message in history[1]
       const modelReply = history[2].parts
@@ -226,6 +235,65 @@ If you cannot recognize the object, respond with "nothing".`;
     } catch (err) {
       console.error("Failed to generate object description:", err);
     }
+  };
+
+  const handleDownloadModel = () => {
+    const link = document.createElement("a");
+    link.href = modelUrls.pbr_model;
+    link.download = "3d-model.glb";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast("Model send for download!");
+  };
+
+  const handleDownloadImage = () => {
+    const link = document.createElement("a");
+    link.href = `data:${image.mimeType};base64,${image.data}`;
+    link.download = "downloaded_image.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownloadBgRemovedImage = () => {
+    const link = document.createElement("a");
+    link.href = bgRemovedImage;
+    link.download = "downloaded_image.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleCopyToClipboard = () => {
+    navigator.clipboard.writeText(modelUrls.pbr_model);
+    toast("Model Link Copied!");
+  };
+
+  const handleGotoViewModel = () => {
+    toast("Redirecting to View Model!");
+    navigator.clipboard.writeText(modelUrls.pbr_model);
+
+    setTimeout(() => {
+      dispatch(setModelLink(modelUrls.pbr_model));
+      navigate("/view");
+    }, 1000);
+  };
+
+  const handleReset = () => {
+    setCurrentStep(1);
+    setImage(null);
+    setBgRemovedImage(null);
+    setIsRemovingBg(false);
+    setDisabled(false);
+    setTaskId(null);
+    setTaskStatus(null);
+    setModelUrls(null);
+    setEditableTranscript("");
+  };
+
+  const handleBack = () => {
+    setCurrentStep((preV) => preV - 1);
   };
 
   return (
@@ -329,11 +397,42 @@ If you cannot recognize the object, respond with "nothing".`;
                 )}
 
                 {step.number === 3 && image && (
-                  <img
-                    src={`data:${image.mimeType};base64,${image.data}`}
-                    alt="Selected Image"
-                    className={styles.selectedImage}
-                  />
+                  <>
+                    <img
+                      src={`data:${image.mimeType};base64,${image.data}`}
+                      alt="Selected Image"
+                      className={styles.selectedImage}
+                    />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 5,
+                        mt: 2,
+                        position: "absolute",
+                        bottom: 10,
+                        width: "100%",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <IconButton
+                        onClick={handleDownloadImage}
+                        sx={{
+                          backgroundColor: "var(--background-color)",
+                          borderRadius: 50,
+                          display: "inherit",
+                          justifyContent: "flex-start",
+                          "&:hover": {
+                            backgroundColor: "var(--background-color)",
+                          },
+                        }}
+                      >
+                        <DownloadIcon
+                          fontSize="small"
+                          sx={{ color: "var(--secondary-color)" }}
+                        />
+                      </IconButton>
+                    </Box>
+                  </>
                 )}
 
                 {step.number === 4 && (
@@ -354,11 +453,42 @@ If you cannot recognize the object, respond with "nothing".`;
                       </Box>
                     ) : (
                       bgRemovedImage && (
-                        <img
-                          src={bgRemovedImage}
-                          alt="Background removed"
-                          className={styles.selectedImage}
-                        />
+                        <>
+                          <img
+                            src={bgRemovedImage}
+                            alt="Background removed"
+                            className={styles.selectedImage}
+                          />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 5,
+                              mt: 2,
+                              position: "absolute",
+                              bottom: 10,
+                              width: "100%",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <IconButton
+                              onClick={handleDownloadBgRemovedImage}
+                              sx={{
+                                backgroundColor: "var(--background-color)",
+                                borderRadius: 50,
+                                display: "inherit",
+                                justifyContent: "flex-start",
+                                "&:hover": {
+                                  backgroundColor: "var(--background-color)",
+                                },
+                              }}
+                            >
+                              <DownloadIcon
+                                fontSize="small"
+                                sx={{ color: "var(--secondary-color)" }}
+                              />
+                            </IconButton>
+                          </Box>
+                        </>
                       )
                     )}
                   </>
@@ -385,18 +515,72 @@ If you cannot recognize the object, respond with "nothing".`;
                     {modelUrls && (
                       <>
                         <img
-                          src={modelUrls.rendered_image}
+                          src={modelUrls?.rendered_image}
                           alt="3D Preview"
                           style={{ width: "200px", borderRadius: 8 }}
                         />
-                        <a
-                          href={modelUrls.pbr_model}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ color: "#7db3ff" }}
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: 5,
+                            mt: 2,
+                            position: "absolute",
+                            bottom: 5,
+                          }}
                         >
-                          Download 3D Model
-                        </a>
+                          <IconButton
+                            onClick={handleDownloadModel}
+                            sx={{
+                              backgroundColor: "var(--background-color)",
+                              borderRadius: 50,
+                              display: "inherit",
+                              justifyContent: "flex-start",
+                              "&:hover": {
+                                backgroundColor: "var(--background-color)",
+                              },
+                            }}
+                          >
+                            <DownloadIcon
+                              fontSize="small"
+                              sx={{ color: "var(--secondary-color)" }}
+                            />
+                          </IconButton>
+                          <IconButton
+                            onClick={handleCopyToClipboard}
+                            sx={{
+                              backgroundColor: "var(--background-color)",
+                              borderRadius: 50,
+                              display: "inherit",
+                              justifyContent: "flex-start",
+                              "&:hover": {
+                                backgroundColor: "var(--background-color)",
+                              },
+                            }}
+                          >
+                            <ContentCopyIcon
+                              fontSize="small"
+                              sx={{ color: "var(--secondary-color)" }}
+                            />
+                          </IconButton>
+                          <IconButton
+                            onClick={handleGotoViewModel}
+                            sx={{
+                              backgroundColor: "var(--background-color)",
+                              borderRadius: 50,
+                              display: "inherit",
+                              justifyContent: "flex-start",
+                              "&:hover": {
+                                backgroundColor: "var(--background-color)",
+                              },
+                            }}
+                          >
+                            <ViewInArIcon
+                              sx={{ color: "var(--secondary-color)" }}
+                              fontSize="small"
+                            />
+                          </IconButton>
+                        </Box>
                       </>
                     )}
                   </Box>
@@ -422,17 +606,31 @@ If you cannot recognize the object, respond with "nothing".`;
             alignItems: "center",
           }}
         >
-          <Button
-            onClick={handleNextStep}
-            borderRadius={2}
-            pl={2}
-            pr={2}
+          <Box
             sx={{
+              display: "flex",
               visibility: isRemovingBg || disabled ? "hidden" : "visible",
+              gap: 20,
             }}
           >
-            <Typography>Next</Typography>
-          </Button>
+            {currentStep === steps.length && (
+              <Button onClick={handleReset} borderRadius={2} pl={2} pr={2}>
+                <Typography>Reset</Typography>
+              </Button>
+            )}
+
+            {currentStep !== 1 && currentStep !== steps.length && (
+              <Button onClick={handleBack} borderRadius={2} pl={2} pr={2}>
+                <Typography>Back</Typography>
+              </Button>
+            )}
+
+            {currentStep !== steps.length && currentStep !== 1 && (
+              <Button onClick={handleNextStep} borderRadius={2} pl={2} pr={2}>
+                <Typography>Next</Typography>
+              </Button>
+            )}
+          </Box>
 
           <Typography align="center" variant="h5">
             <GradientTxt txt={steps[currentStep - 1]?.title} />

@@ -220,6 +220,7 @@ function AudioToModel() {
     setTaskId(null);
     setTaskStatus(null);
     setModelUrls(null);
+    setEditableTranscript("");
   };
 
   const handleBack = () => {
