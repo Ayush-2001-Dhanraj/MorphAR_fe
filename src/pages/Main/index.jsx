@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
+  Card,
+  CardContent,
   Container,
+  Grid,
   IconButton,
   TextField,
   Typography,
@@ -24,29 +27,64 @@ import ChatService from "../../services/chatServices";
 import { isImagePrompt } from "../../models/text_model";
 import { useClerk } from "@clerk/clerk-react";
 import { setIsLoading } from "../../redux/features/app/appSlice";
+import ViewInArIcon from "@mui/icons-material/ViewInAr";
+import AudiotrackIcon from "@mui/icons-material/Audiotrack";
+import GestureIcon from "@mui/icons-material/Gesture";
+import styles from "./Main.module.css";
+import GradientTxt from "../../components/GradientTxt";
+import { useNavigate } from "react-router";
 
 function Main() {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [openSpeech, setOpenSpeech] = useState(false);
+  const [openImage, setOpenImage] = useState(true);
+  const [selectedImage, setSelectedImage] = useState("");
+  const containerRef = useRef(null);
+  const bottomRef = useRef(null);
 
   const user = useSelector(getUser);
   const currentChat = useSelector(getCurrentChat);
 
   const { openSignIn } = useClerk();
-
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const [openSpeech, setOpenSpeech] = useState(false);
-  const handleCloseSpeech = () => setOpenSpeech(false);
+  const features = [
+    {
+      icon: <GestureIcon sx={{ fontSize: 40, color: "var(--text-color)" }} />,
+      title: "Sketch to 3D Model",
+      description: "Draw a sketch and instantly generate a 3D model using AI.",
+      to: "/sketch",
+    },
+    {
+      icon: (
+        <AudiotrackIcon sx={{ fontSize: 40, color: "var(--text-color)" }} />
+      ),
+      title: "Audio Prompt to 3D",
+      description:
+        "Describe your idea in voice and let AI build your 3D scene.",
+      to: "/text",
+    },
+    {
+      icon: <ViewInArIcon sx={{ fontSize: 40, color: "var(--text-color)" }} />,
+      title: "XR Visualization",
+      description: "View your model in Virtual Reality using the XR Viewer.",
+      to: "/view",
+    },
+  ];
+
+  const handleCloseSpeech = () => {
+    setOpenSpeech(false);
+  };
+
   const handleSaveTranscript = (transcript) => {
     setInput(transcript);
     handleCloseSpeech();
     handleSend(transcript);
   };
 
-  const [openImage, setOpenImage] = useState(true);
-  const [selectedImage, setSelectedImage] = useState("");
   const closeOpenImage = () => {
     setOpenImage(false);
     setSelectedImage("");
@@ -56,9 +94,6 @@ function Main() {
     setSelectedImage(data);
     setOpenImage(true);
   };
-
-  const bottomRef = useRef(null);
-  const containerRef = useRef(null);
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
@@ -261,7 +296,7 @@ function Main() {
   return (
     <>
       <Container
-        maxWidth="md"
+        maxWidth="lg"
         ref={containerRef}
         sx={{
           height: "calc(100vh - 180px)",
@@ -278,7 +313,72 @@ function Main() {
         <div ref={bottomRef} />
       </Container>
 
-      <Container maxWidth="md">
+      <Container maxWidth="lg">
+        {!currentChat && !history.length && (
+          <Box sx={{ overflowX: "auto", whiteSpace: "nowrap", px: 2, mb: 2 }}>
+            <Grid
+              container
+              spacing={2}
+              wrap="nowrap"
+              sx={{
+                display: "flex",
+                flexWrap: "nowrap",
+              }}
+            >
+              {features.map((feature, index) => (
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  lg={3}
+                  key={index}
+                  sx={{ minWidth: 300, cursor: "pointer" }}
+                  onClick={() => navigate(feature.to)}
+                >
+                  <Card
+                    elevation={3}
+                    sx={{
+                      height: "100%",
+                      textAlign: "center",
+                      p: 2,
+                      borderRadius: 3,
+                      backgroundColor: "var(--primary-color)",
+                    }}
+                    className={styles.gradient_border}
+                  >
+                    <Box display="flex" justifyContent="center" mb={2}>
+                      {feature.icon}
+                    </Box>
+                    <CardContent>
+                      <Typography
+                        variant="h6"
+                        gutterBottom
+                        sx={{ color: "var(--text-color)", fontWeight: "bold" }}
+                      >
+                        {feature.title}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "var(--text-color)",
+                          whiteSpace: "normal",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {feature.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+            <Typography variant="h5" align="center" sx={{ marginTop: 2 }}>
+              <GradientTxt txt="AI-powered 3D model generation from sketches and speech, with XR previews." />
+            </Typography>
+          </Box>
+        )}
+
         <Box
           sx={{
             backgroundColor: "var(--primary-color)",

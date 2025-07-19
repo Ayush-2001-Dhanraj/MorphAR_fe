@@ -91,7 +91,7 @@ function SideBar() {
     const pathname = location.pathname;
 
     if (pathname === "/") {
-      if (!user) dispatch(setGreetMsg("Hello! Welcome to MorphAR"));
+      if (!user) dispatch(setGreetMsg("Hello! Welcome to MorphAI"));
       else dispatch(setGreetMsg(`Namaste, ${user.name}!!!`));
     } else if (pathname === "/tripo") {
       dispatch(setGreetMsg("Let's get started with Tripo! Image to 3D Model"));

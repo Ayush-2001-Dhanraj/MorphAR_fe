@@ -1,0 +1,16 @@
+.gradient_border {
+    border: 4px solid transparent;
+    background: linear-gradient(var(--primary-color), var(--primary-color)) padding-box,
+        linear-gradient(75deg,
+            #4285f4 0,
+            #4285f4 9%,
+            #4285f4 20%,
+            #9b72cb 24%,
+            #9b72cb 35%,
+            #9b72cb 44%,
+            #9b72cb 50%,
+            #d96570 56%,
+            #d96570 75%,
+            #d96570 100%) border-box !important;
+
+}
