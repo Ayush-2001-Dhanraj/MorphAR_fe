@@ -14,3 +14,14 @@
             #d96570 100%) border-box !important;
 
 }
+
+.introBoxContainer {
+    flex-wrap: wrap;
+    height: 300px;
+    overflow: scroll;
+
+    @media (min-width:641px) {
+        /* portrait tablets, portrait iPad, landscape e-readers, landscape 800x480 or 854x480 phones */
+        flex-wrap: nowrap;
+    }
+}

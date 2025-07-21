@@ -22,6 +22,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ChatService from "../../services/chatServices";
 import { setGreetMsg, setModelLink } from "../../redux/features/app/appSlice";
 import ViewInArIcon from "@mui/icons-material/ViewInAr";
+import { SignedIn } from "@clerk/clerk-react";
 
 const drawerWidth = 240;
 
@@ -203,98 +204,101 @@ function SideBar() {
             </Typography>
           )}
         </IconButton>
-        <IconButton
-          onClick={handleClickViewModel}
-          sx={{
-            backgroundColor: "var(--background-color)",
-            borderRadius: open ? 4 : 50,
-            display: "inherit",
-            justifyContent: "flex-start",
-            "&:hover": {
+
+        <SignedIn>
+          <IconButton
+            onClick={handleClickViewModel}
+            sx={{
               backgroundColor: "var(--background-color)",
-            },
-          }}
-        >
-          <ViewInArIcon sx={{ color: "var(--secondary-color)" }} />
-          {open && (
-            <Typography
-              variant="subtitle2"
-              pl={1}
-              color="var(--secondary-color)"
-            >
-              View Your 3D Model
-            </Typography>
-          )}
-        </IconButton>
-        <IconButton
-          onClick={handleClickImgTo3D}
-          sx={{
-            backgroundColor: "var(--background-color)",
-            borderRadius: open ? 4 : 50,
-            display: "inherit",
-            justifyContent: "flex-start",
-            "&:hover": {
+              borderRadius: open ? 4 : 50,
+              display: "inherit",
+              justifyContent: "flex-start",
+              "&:hover": {
+                backgroundColor: "var(--background-color)",
+              },
+            }}
+          >
+            <ViewInArIcon sx={{ color: "var(--secondary-color)" }} />
+            {open && (
+              <Typography
+                variant="subtitle2"
+                pl={1}
+                color="var(--secondary-color)"
+              >
+                View Your 3D Model
+              </Typography>
+            )}
+          </IconButton>
+          <IconButton
+            onClick={handleClickImgTo3D}
+            sx={{
               backgroundColor: "var(--background-color)",
-            },
-          }}
-        >
-          <ImageIcon sx={{ color: "var(--secondary-color)" }} />
-          {open && (
-            <Typography
-              variant="subtitle2"
-              pl={1}
-              color="var(--secondary-color)"
-            >
-              Image to 3D Model
-            </Typography>
-          )}
-        </IconButton>
-        <IconButton
-          onClick={handleClickTextAudioTo3D}
-          sx={{
-            backgroundColor: "var(--background-color)",
-            borderRadius: open ? 4 : 50,
-            display: "inherit",
-            justifyContent: "flex-start",
-            "&:hover": {
+              borderRadius: open ? 4 : 50,
+              display: "inherit",
+              justifyContent: "flex-start",
+              "&:hover": {
+                backgroundColor: "var(--background-color)",
+              },
+            }}
+          >
+            <ImageIcon sx={{ color: "var(--secondary-color)" }} />
+            {open && (
+              <Typography
+                variant="subtitle2"
+                pl={1}
+                color="var(--secondary-color)"
+              >
+                Image to 3D Model
+              </Typography>
+            )}
+          </IconButton>
+          <IconButton
+            onClick={handleClickTextAudioTo3D}
+            sx={{
               backgroundColor: "var(--background-color)",
-            },
-          }}
-        >
-          <AudiotrackIcon sx={{ color: "var(--secondary-color)" }} />
-          {open && (
-            <Typography
-              variant="subtitle2"
-              pl={1}
-              color="var(--secondary-color)"
-            >
-              Text/Audio to 3D Model
-            </Typography>
-          )}
-        </IconButton>
-        <IconButton
-          onClick={handleClickSketchTo3D}
-          sx={{
-            backgroundColor: "var(--background-color)",
-            borderRadius: open ? 4 : 50,
-            display: "inherit",
-            justifyContent: "flex-start",
-            "&:hover": {
+              borderRadius: open ? 4 : 50,
+              display: "inherit",
+              justifyContent: "flex-start",
+              "&:hover": {
+                backgroundColor: "var(--background-color)",
+              },
+            }}
+          >
+            <AudiotrackIcon sx={{ color: "var(--secondary-color)" }} />
+            {open && (
+              <Typography
+                variant="subtitle2"
+                pl={1}
+                color="var(--secondary-color)"
+              >
+                Text/Audio to 3D Model
+              </Typography>
+            )}
+          </IconButton>
+          <IconButton
+            onClick={handleClickSketchTo3D}
+            sx={{
               backgroundColor: "var(--background-color)",
-            },
-          }}
-        >
-          <GestureIcon sx={{ color: "var(--secondary-color)" }} />
-          {open && (
-            <Typography
-              variant="subtitle2"
-              pl={1}
-              color="var(--secondary-color)"
-            >
-              Sketch your 3D Model
-            </Typography>
-          )}
-        </IconButton>
+              borderRadius: open ? 4 : 50,
+              display: "inherit",
+              justifyContent: "flex-start",
+              "&:hover": {
+                backgroundColor: "var(--background-color)",
+              },
+            }}
+          >
+            <GestureIcon sx={{ color: "var(--secondary-color)" }} />
+            {open && (
+              <Typography
+                variant="subtitle2"
+                pl={1}
+                color="var(--secondary-color)"
+              >
+                Sketch your 3D Model
+              </Typography>
+            )}
+          </IconButton>
+        </SignedIn>
       </Box>
       <Divider
         sx={{

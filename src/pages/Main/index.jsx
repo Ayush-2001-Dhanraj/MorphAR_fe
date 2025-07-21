@@ -166,6 +166,16 @@ function Main() {
     setOpenSpeech((preV) => !preV);
   };
 
+  const handleClickIntroBox = (to) => {
+    if (!user) {
+      openSignIn();
+      setLoading(false);
+      setInput("");
+    } else {
+      navigate(to);
+    }
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [history, loading]);
@@ -296,7 +306,6 @@ function Main() {
   return (
     <>
       <Container
-        maxWidth="lg"
         ref={containerRef}
         sx={{
           height: "calc(100vh - 180px)",
@@ -313,29 +322,20 @@ function Main() {
         <div ref={bottomRef} />
       </Container>
 
-      <Container maxWidth="lg">
+      <Container>
         {!currentChat && !history.length && (
-          <Box sx={{ overflowX: "auto", whiteSpace: "nowrap", px: 2, mb: 2 }}>
-            <Grid
-              container
-              spacing={2}
-              wrap="nowrap"
+          <Box sx={{ px: 2, mb: 2 }}>
+            <Box
               sx={{
                 display: "flex",
-                flexWrap: "nowrap",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 5,
               }}
+              className={styles.introBoxContainer}
             >
               {features.map((feature, index) => (
-                <Grid
-                  item
-                  xs={12}
-                  sm={6}
-                  md={4}
-                  lg={3}
-                  key={index}
-                  sx={{ minWidth: 300, cursor: "pointer" }}
-                  onClick={() => navigate(feature.to)}
-                >
+                <Box onClick={() => handleClickIntroBox(feature.to)}>
                   <Card
                     elevation={3}
                     sx={{
@@ -370,10 +370,10 @@ function Main() {
                       </Typography>
                     </CardContent>
                   </Card>
-                </Grid>
+                </Box>
               ))}
-            </Grid>
-            <Typography variant="h5" align="center" sx={{ marginTop: 2 }}>
+            </Box>
+            <Typography align="center" sx={{ marginTop: 2 }}>
               <GradientTxt txt="AI-powered 3D model generation from sketches and speech, with XR previews." />
             </Typography>
           </Box>

@@ -1,5 +1,5 @@
 // App.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Footer from "./components/Footer";
 import Main from "./pages/Main";
 import { Box, Typography } from "@mui/material";
@@ -29,6 +29,7 @@ import { ToastContainer, toast } from "react-toastify";
 import GradientTxt from "./components/GradientTxt";
 import Sketch from "./pages/Sketch";
 import ViewModel from "./pages/ViewModel";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Layout Component that wraps all pages
 const Layout = () => {
@@ -66,19 +67,35 @@ const router = createBrowserRouter([
       },
       {
         path: "tripo",
-        element: <Tripo />,
+        element: (
+          <ProtectedRoute>
+            <Tripo />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "text",
-        element: <AudioToModel />,
+        element: (
+          <ProtectedRoute>
+            <AudioToModel />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "sketch",
-        element: <Sketch />,
+        element: (
+          <ProtectedRoute>
+            <Sketch />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "view",
-        element: <ViewModel />,
+        element: (
+          <ProtectedRoute>
+            <ViewModel />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "*", // Catch-all route for 404
