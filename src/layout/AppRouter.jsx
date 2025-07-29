@@ -7,6 +7,7 @@ import AudioToModel from "../pages/AudioToModel";
 import Sketch from "../pages/Sketch";
 import NotFound from "../pages/NotFound";
 import ViewModel from "../pages/ViewModel";
+import Home from "../pages/Home";
 
 const AppRouter = createBrowserRouter([
   {
@@ -16,6 +17,10 @@ const AppRouter = createBrowserRouter([
       {
         path: "",
         element: <Main />,
+      },
+      {
+        path: "home",
+        element: <Home />,
       },
       {
         path: "tripo",

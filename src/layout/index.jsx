@@ -6,13 +6,28 @@ import SideBar from "../components/Sidebar";
 import Header from "../components/Header";
 import GradientTxt from "../components/GradientTxt";
 import { Box, Typography } from "@mui/material";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import Footer from "../components/Footer";
 
 // Layout Component that wraps all pages
 const Layout = () => {
   const greetMsg = useSelector(getGreetMsg);
   const currentChat = useSelector(getCurrentChat);
+  const location = useLocation();
+
+  if (location.pathname === "/Home") {
+    return (
+      <>
+        <Box className={styles.mainContainer}>
+          <Box className={styles.main} pr={2} pl={2}>
+            <Header />
+            <Outlet />
+          </Box>
+        </Box>
+      </>
+    );
+  }
+
   return (
     <>
       <Box className={styles.mainContainer}>

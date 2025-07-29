@@ -1,7 +1,12 @@
 import React from "react";
+import MainCanvas from "../../components/Three/MainCanvas";
 
 function Home() {
-  return <div>Home</div>;
+  return (
+    <>
+      <MainCanvas />
+    </>
+  );
 }
 
 export default Home;

@@ -25,7 +25,7 @@ function Header() {
   };
 
   return (
-    <DrawerHeader sx={{ justifyContent: "space-between" }}>
+    <DrawerHeader sx={{ justifyContent: "space-between", zIndex: 1 }}>
       <Typography
         variant="h6"
         sx={{ cursor: "pointer" }}
