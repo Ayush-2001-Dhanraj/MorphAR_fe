@@ -1,9 +1,4 @@
-import {
-  MotionPathControls,
-  useMotion,
-  useScroll,
-  useGLTF,
-} from "@react-three/drei";
+import { MotionPathControls, useMotion, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import React, { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -24,7 +19,7 @@ function AutoMoveObject() {
   const motion = useMotion();
 
   useFrame((state, delta) => {
-    motion.current += delta * 0.001;
+    motion.current += delta * 0.005;
   });
 
   return null;

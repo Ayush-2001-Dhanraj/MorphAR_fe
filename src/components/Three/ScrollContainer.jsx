@@ -1,5 +1,5 @@
 import React from "react";
-import MainScene from "./mainScene";
+import MainScene from "./MainScene";
 import { ScrollControls } from "@react-three/drei";
 
 function ScrollContainer() {

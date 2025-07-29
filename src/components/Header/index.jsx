@@ -1,4 +1,4 @@
-import { IconButton, styled, Typography } from "@mui/material";
+import { Box, Button, IconButton, styled, Typography } from "@mui/material";
 import {
   SignedIn,
   SignedOut,
@@ -7,7 +7,7 @@ import {
 } from "@clerk/clerk-react";
 import GradientTxt from "../GradientTxt";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 const DrawerHeader = styled("Box")(({ theme }) => ({
   display: "flex",
@@ -19,6 +19,7 @@ const DrawerHeader = styled("Box")(({ theme }) => ({
 
 function Header() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleNameClick = () => {
     navigate("/");
@@ -38,19 +39,33 @@ function Header() {
           }}
         />
       </Typography>
-      <SignedOut>
-        <SignInButton mode="modal">
-          <IconButton>
-            <AccountCircleIcon
-              fontSize="large"
-              sx={{ color: "var(--text-color)" }}
-            />
-          </IconButton>
-        </SignInButton>
-      </SignedOut>
-      <SignedIn>
-        <UserButton />
-      </SignedIn>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
+        {location.pathname === "/" && (
+          <Button variant="contained" onClick={() => navigate("/Home")}>
+            Try now!
+          </Button>
+        )}
+        <SignedOut>
+          <SignInButton mode="modal">
+            <IconButton>
+              <AccountCircleIcon
+                fontSize="large"
+                sx={{ color: "var(--text-color)" }}
+              />
+            </IconButton>
+          </SignInButton>
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+      </Box>
     </DrawerHeader>
   );
 }

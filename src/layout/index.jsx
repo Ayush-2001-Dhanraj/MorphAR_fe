@@ -15,7 +15,7 @@ const Layout = () => {
   const currentChat = useSelector(getCurrentChat);
   const location = useLocation();
 
-  if (location.pathname === "/Home") {
+  if (location.pathname === "/") {
     return (
       <>
         <Box className={styles.mainContainer}>

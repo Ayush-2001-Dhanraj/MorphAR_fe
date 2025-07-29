@@ -91,7 +91,7 @@ function SideBar() {
   useEffect(() => {
     const pathname = location.pathname;
 
-    if (pathname === "/") {
+    if (pathname === "/Home") {
       if (!user) dispatch(setGreetMsg("Hello! Welcome to MorphAI"));
       else dispatch(setGreetMsg(`Namaste, ${user.name}!!!`));
     } else if (pathname === "/tripo") {
@@ -123,7 +123,7 @@ function SideBar() {
 
   const handleNewChat = () => {
     dispatch(updateChat(null));
-    navigate("/");
+    navigate("/Home");
   };
 
   const handleClickViewModel = () => {
@@ -144,7 +144,7 @@ function SideBar() {
 
   const handleClickChat = (chat_id) => {
     dispatch(updateChat(chat_id));
-    navigate("/");
+    navigate("/Home");
   };
 
   const deleteChat = async (chat_id) => {
