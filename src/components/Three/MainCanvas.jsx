@@ -20,7 +20,7 @@ const MainCanvas = () => {
         <Environment files={"images/sky.jpg"} />
         <ScrollContainer />
         {/* <OrbitControls /> */}
-        <SkyScene />
+        {/* <SkyScene /> */}
       </Canvas>
     </Box>
   );
