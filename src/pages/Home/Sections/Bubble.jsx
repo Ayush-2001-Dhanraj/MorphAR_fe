@@ -1,6 +1,6 @@
 import React, { useRef, useLayoutEffect, useState } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
-import { Float, useScroll } from "@react-three/drei";
+import { Float, Trail, useScroll } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
 

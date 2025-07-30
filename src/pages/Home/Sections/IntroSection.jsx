@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect, useMemo } from "react";
+import React, { useRef, useLayoutEffect, useMemo, useEffect } from "react";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";

@@ -77,38 +77,7 @@ function MainScene({ skyRef }) {
         />
       </group>
 
-      {/* Object 2: appears at section 1 */}
-      {section === 0 && <IntroSection />}
-
-      {/* Object 3: appears at section 2 */}
-      {section === 1 && (
-        <mesh>
-          <boxGeometry args={[1, 1, 1]} />
-          <meshStandardMaterial color="blue" />
-        </mesh>
-      )}
-
-      {/* Object 4: appears at section 3 */}
-      {section === 2 && (
-        <mesh>
-          <sphereGeometry args={[0.5, 32, 32]} />
-          <meshStandardMaterial color="green" />
-        </mesh>
-      )}
-
-      {/* Object 5: appears at section 4 */}
-      {section === 3 && (
-        <mesh>
-          <torusGeometry args={[0.5, 0.2, 16, 100]} />
-          <meshStandardMaterial color="orange" />
-        </mesh>
-      )}
-      {section === 4 && (
-        <mesh>
-          <torusGeometry args={[0.5, 0.2, 16, 100]} />
-          <meshStandardMaterial color="pink" />
-        </mesh>
-      )}
+      <IntroSection />
     </>
   );
 }
