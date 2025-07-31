@@ -11,7 +11,7 @@ function IntroSection() {
     const bubbles = [];
     const count = 25;
     for (let i = 0; i < count; i++) {
-      const radius = THREE.MathUtils.randFloat(1, 1.5); // Increased radius
+      const radius = THREE.MathUtils.randFloat(1, 3); // Increased radius
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.random() * Math.PI;
 

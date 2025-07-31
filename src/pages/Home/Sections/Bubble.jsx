@@ -107,7 +107,7 @@ function Bubble({ position, delay = 0, radius = 0.5, size = 0.4 }) {
   }, [hovered]);
 
   return (
-    <Float speed={1.5} rotationIntensity={0.4} floatIntensity={1.2}>
+    <Float speed={1.5} rotationIntensity={0.8} floatIntensity={2}>
       <mesh
         ref={meshRef}
         position={position}
