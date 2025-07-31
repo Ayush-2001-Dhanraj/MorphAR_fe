@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect, useState } from "react";
+import React, { useRef, useLayoutEffect, useState, useEffect } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 import { Float, Trail, useScroll } from "@react-three/drei";
 import * as THREE from "three";
@@ -28,28 +28,6 @@ function Bubble({ position, delay = 0, radius = 0.5, size = 0.4 }) {
 
   useFrame((_, delta) => {
     if (!meshRef.current) return;
-
-    const pos = meshRef.current.position;
-
-    if (hovered) {
-      const vector = new THREE.Vector3(mouse.x, mouse.y, 0.5).unproject(camera);
-      const dir = vector.sub(camera.position).normalize();
-      const distance = (originalPos.current.z - camera.position.z) / dir.z;
-      const mouseWorld = camera.position
-        .clone()
-        .add(dir.multiplyScalar(distance));
-
-      // Simple repulsion
-      const repulse = pos
-        .clone()
-        .sub(mouseWorld)
-        .normalize()
-        .multiplyScalar(0.05);
-      pos.add(repulse);
-    } else {
-      // Ease back to original position
-      pos.lerp(originalPos.current, 0.05);
-    }
 
     const baseAngle = Math.atan2(originalPos.current.z, originalPos.current.x);
     const baseRadius = originalPos.current.length();
@@ -90,20 +68,10 @@ function Bubble({ position, delay = 0, radius = 0.5, size = 0.4 }) {
         },
       }
     );
+  }, [hovered]);
 
-    // Small shake
-    gsap.fromTo(
-      meshRef.current.rotation,
-      { x: 0, y: 0 },
-      {
-        x: 0.1,
-        y: -0.1,
-        duration: 0.2,
-        repeat: 1,
-        yoyo: true,
-        ease: "power1.inOut",
-      }
-    );
+  useEffect(() => {
+    console.log(hovered);
   }, [hovered]);
 
   return (
