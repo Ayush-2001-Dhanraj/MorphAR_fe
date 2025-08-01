@@ -1,8 +1,10 @@
 import { MotionPathControls, useGLTF, useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import IntroSection from "./Sections/IntroSection";
+import PlatformSection from "./Sections/PlatformSection";
+import gsap from "gsap";
 
 const generateCirclePoints = (numPoints = 100, radius = 50) => {
   const points = [];
@@ -16,19 +18,72 @@ const generateCirclePoints = (numPoints = 100, radius = 50) => {
   return points;
 };
 
-function AutoMoveObject({ targetRef, skyRef, setSection }) {
+function AutoMoveObject({
+  scrollControllerRef,
+  skyRef,
+  setSection,
+  introRef,
+  taskSectionRef1,
+  taskSectionRef2,
+  platform1,
+  platform2,
+  platform3,
+  platform4,
+}) {
   const scroll = useScroll();
 
   useFrame((state, delta) => {
     const section = Math.floor(scroll.offset * 5);
     setSection(section);
 
+    if (taskSectionRef1.current && section === 0) {
+      taskSectionRef1.current.position.y = scroll.offset * 13.8 - 2;
+      taskSectionRef2.current.position.y = scroll.offset * 13.8 - 2.5;
+      platform1.current.children[1].rotation.y += delta * 2;
+      platform2.current.children[1].rotation.y += delta * 1.5;
+      platform3.current.children[1].rotation.y += delta * 2;
+      platform4.current.children[1].rotation.y += delta * 1.2;
+    }
+
+    if (section === 1) {
+      platform1.current.children[1].rotation.y += delta * 2;
+      gsap.to(platform1.current.position, {
+        z: 0,
+        duration: 1.5,
+        ease: "power2.out",
+        delay: 1,
+      });
+      gsap.to(platform2.current.position, {
+        z: 0.2,
+        duration: 1.5,
+        ease: "power2.out",
+        delay: 1,
+      });
+      gsap.to(platform3.current.position, {
+        z: 0.2,
+        duration: 1.5,
+        ease: "power2.out",
+        delay: 1,
+      });
+      gsap.to(platform4.current.position, {
+        z: -0.2,
+        duration: 1.5,
+        ease: "power2.out",
+        delay: 1,
+      });
+    }
+
+    if (introRef.current) {
+      introRef.current.position.x = scroll.offset * 5;
+      introRef.current.position.y = scroll.offset * 5;
+    }
+
     if (skyRef.current) {
       skyRef.current.rotation.y += delta * 0.05;
     }
 
-    if (targetRef.current) {
-      targetRef.current.rotation.x = scroll.offset * 2 * Math.PI;
+    if (scrollControllerRef.current) {
+      scrollControllerRef.current.rotation.x = scroll.offset * 2 * Math.PI;
     }
   });
 
@@ -40,6 +95,16 @@ function MainScene({ skyRef }) {
   const flowerRef = useRef();
   const [section, setSection] = useState(0);
 
+  const introSectionRef = useRef();
+  const taskSectionRef1 = useRef();
+  const taskSectionRef2 = useRef();
+  const taskSectionRef3 = useRef();
+
+  const platform1 = useRef();
+  const platform2 = useRef();
+  const platform3 = useRef();
+  const platform4 = useRef();
+
   const gltf = useGLTF("models/red_flower.glb");
 
   const { curve } = useMemo(() => {
@@ -48,6 +113,10 @@ function MainScene({ skyRef }) {
 
     return { curve };
   }, []);
+
+  useEffect(() => {
+    console.log("section", section);
+  }, [section]);
 
   useEffect(() => {
     if (gltf.scene) {
@@ -62,9 +131,16 @@ function MainScene({ skyRef }) {
     <>
       <MotionPathControls curves={[curve]} focus={boxRef}>
         <AutoMoveObject
-          targetRef={flowerRef}
+          scrollControllerRef={flowerRef}
           skyRef={skyRef}
           setSection={setSection}
+          introRef={introSectionRef}
+          taskSectionRef1={taskSectionRef1}
+          taskSectionRef2={taskSectionRef2}
+          platform1={platform1}
+          platform2={platform2}
+          platform3={platform3}
+          platform4={platform4}
         />
       </MotionPathControls>
 
@@ -77,7 +153,18 @@ function MainScene({ skyRef }) {
         />
       </group>
 
-      <IntroSection />
+      <IntroSection
+        introGroupRef={introSectionRef}
+        taskSectionRef1={taskSectionRef1}
+      />
+
+      <PlatformSection
+        taskSectionRef2={taskSectionRef2}
+        platform1={platform1}
+        platform2={platform2}
+        platform3={platform3}
+        platform4={platform4}
+      />
     </>
   );
 }

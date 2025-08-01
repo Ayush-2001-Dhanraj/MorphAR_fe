@@ -70,10 +70,6 @@ function Bubble({ position, delay = 0, radius = 0.5, size = 0.4 }) {
     );
   }, [hovered]);
 
-  useEffect(() => {
-    console.log(hovered);
-  }, [hovered]);
-
   return (
     <Float speed={1.5} rotationIntensity={0.8} floatIntensity={2}>
       <mesh
