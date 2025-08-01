@@ -3,8 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import IntroSection from "./Sections/IntroSection";
-import PlatformSection from "./Sections/PlatformSection";
 import gsap from "gsap";
+import Bubble from "./Sections/Bubble";
 
 const generateCirclePoints = (numPoints = 100, radius = 50) => {
   const points = [];
@@ -24,11 +24,8 @@ function AutoMoveObject({
   setSection,
   introRef,
   taskSectionRef1,
-  taskSectionRef2,
-  platform1,
-  platform2,
-  platform3,
-  platform4,
+  setHelperText,
+  sectionRefs,
 }) {
   const scroll = useScroll();
 
@@ -36,41 +33,63 @@ function AutoMoveObject({
     const section = Math.floor(scroll.offset * 5);
     setSection(section);
 
-    if (taskSectionRef1.current && section === 0) {
-      taskSectionRef1.current.position.y = scroll.offset * 13.8 - 2;
-      taskSectionRef2.current.position.y = scroll.offset * 13.8 - 2.5;
-      platform1.current.children[1].rotation.y += delta * 2;
-      platform2.current.children[1].rotation.y += delta * 1.5;
-      platform3.current.children[1].rotation.y += delta * 2;
-      platform4.current.children[1].rotation.y += delta * 1.2;
+    if (section == 0) {
+      setHelperText("");
     }
 
-    if (section === 1) {
-      platform1.current.children[1].rotation.y += delta * 2;
-      gsap.to(platform1.current.position, {
-        z: 0,
-        duration: 1.5,
-        ease: "power2.out",
-        delay: 1,
-      });
-      gsap.to(platform2.current.position, {
-        z: 0.2,
-        duration: 1.5,
-        ease: "power2.out",
-        delay: 1,
-      });
-      gsap.to(platform3.current.position, {
-        z: 0.2,
-        duration: 1.5,
-        ease: "power2.out",
-        delay: 1,
-      });
-      gsap.to(platform4.current.position, {
-        z: -0.2,
-        duration: 1.5,
-        ease: "power2.out",
-        delay: 1,
-      });
+    if (section === 1 || section === 2) {
+      setHelperText("Let's start with the vase");
+
+      let value = scroll.offset; // Example input
+      let oldMin = 0.2;
+      let oldMax = 0.6;
+      let newMin = 0;
+      let newMax = 1;
+
+      let mappedValue =
+        ((value - oldMin) / (oldMax - oldMin)) * (newMax - newMin) + newMin;
+      const n = 3;
+      const part = Math.min(Math.floor(mappedValue * n), n - 1);
+
+      switch (part) {
+        case 0:
+          sectionRefs.section1A.current.visible = true;
+          sectionRefs.section1B.current.visible = false;
+          sectionRefs.section1C.current.visible = false;
+          break;
+        case 1:
+          sectionRefs.section1A.current.visible = true;
+          sectionRefs.section1B.current.visible = true;
+          sectionRefs.section1C.current.visible = false;
+          break;
+        case 2:
+          sectionRefs.section1A.current.visible = true;
+          sectionRefs.section1B.current.visible = true;
+          sectionRefs.section1C.current.visible = true;
+          break;
+
+        default:
+          break;
+      }
+
+      const animateY = (ref, visible, delay = 0) => {
+        if (ref?.current) {
+          gsap.to(ref.current.position, {
+            y: visible ? 0.3 : -0.3,
+            duration: 0.6,
+            ease: "power2.out",
+            delay,
+          });
+        }
+      };
+
+      animateY(sectionRefs.section1A, part >= 0);
+      animateY(sectionRefs.section1B, part >= 1);
+      animateY(sectionRefs.section1C, part >= 2);
+    }
+
+    if (taskSectionRef1.current && section === 0) {
+      taskSectionRef1.current.position.y = scroll.offset * 13.8 - 2;
     }
 
     if (introRef.current) {
@@ -94,18 +113,35 @@ function MainScene({ skyRef }) {
   const boxRef = useRef();
   const flowerRef = useRef();
   const [section, setSection] = useState(0);
+  const [helperText, setHelperText] = useState("");
 
   const introSectionRef = useRef();
   const taskSectionRef1 = useRef();
-  const taskSectionRef2 = useRef();
-  const taskSectionRef3 = useRef();
-
-  const platform1 = useRef();
-  const platform2 = useRef();
-  const platform3 = useRef();
-  const platform4 = useRef();
+  const section1A = useRef();
+  const section1B = useRef();
+  const section1C = useRef();
 
   const gltf = useGLTF("models/red_flower.glb");
+
+  const randomBubbles = useMemo(() => {
+    const bubbles = [];
+    const count = 25;
+    for (let i = 0; i < count; i++) {
+      const radius = THREE.MathUtils.randFloat(1, 1.5); // Increased radius
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI;
+
+      const x = radius * Math.sin(phi) * Math.cos(theta);
+      const y = radius * Math.sin(phi) * Math.sin(theta);
+      const z = radius * Math.cos(phi);
+
+      const delay = 1.5 + Math.random() * 0.8;
+      const size = THREE.MathUtils.randFloat(0.1, 0.2);
+
+      bubbles.push({ position: [x, y, z], delay, size });
+    }
+    return bubbles;
+  }, []);
 
   const { curve } = useMemo(() => {
     const curvePoints = generateCirclePoints(15, 2);
@@ -136,11 +172,8 @@ function MainScene({ skyRef }) {
           setSection={setSection}
           introRef={introSectionRef}
           taskSectionRef1={taskSectionRef1}
-          taskSectionRef2={taskSectionRef2}
-          platform1={platform1}
-          platform2={platform2}
-          platform3={platform3}
-          platform4={platform4}
+          setHelperText={setHelperText}
+          sectionRefs={{ section1A, section1B, section1C }}
         />
       </MotionPathControls>
 
@@ -156,15 +189,20 @@ function MainScene({ skyRef }) {
       <IntroSection
         introGroupRef={introSectionRef}
         taskSectionRef1={taskSectionRef1}
+        helperText={helperText}
+        section={section}
+        sectionRefs={{ section1A, section1B, section1C }}
       />
 
-      <PlatformSection
-        taskSectionRef2={taskSectionRef2}
-        platform1={platform1}
-        platform2={platform2}
-        platform3={platform3}
-        platform4={platform4}
-      />
+      {randomBubbles.map((bubble, index) => (
+        <Bubble
+          key={index}
+          position={bubble.position}
+          delay={bubble.delay}
+          size={bubble.size}
+          section={section}
+        />
+      ))}
     </>
   );
 }

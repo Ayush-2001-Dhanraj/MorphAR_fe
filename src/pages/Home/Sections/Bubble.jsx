@@ -1,10 +1,10 @@
 import React, { useRef, useLayoutEffect, useState, useEffect } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
-import { Float, Trail, useScroll } from "@react-three/drei";
+import { Float, useScroll } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
 
-function Bubble({ position, delay = 0, radius = 0.5, size = 0.4 }) {
+function Bubble({ position, delay = 0, size = 0.4, section }) {
   const meshRef = useRef();
   const materialRef = useRef();
   const { camera, mouse } = useThree();
@@ -13,6 +13,20 @@ function Bubble({ position, delay = 0, radius = 0.5, size = 0.4 }) {
 
   const scroll = useScroll();
 
+  // ✳️ Stable section tracking to prevent bubble blip
+  const [localSection, setLocalSection] = useState(section);
+  const lastStableSection = useRef(section);
+
+  useEffect(() => {
+    if (section !== lastStableSection.current) {
+      lastStableSection.current = section;
+      setTimeout(() => {
+        setLocalSection(section);
+      }, 150); // Adjust if needed
+    }
+  }, [section]);
+
+  // ✨ Intro animation on mount
   useLayoutEffect(() => {
     if (!meshRef.current) return;
     meshRef.current.scale.set(0, 0, 0);
@@ -26,16 +40,25 @@ function Bubble({ position, delay = 0, radius = 0.5, size = 0.4 }) {
     });
   }, [delay]);
 
-  useFrame((_, delta) => {
+  // 🎯 Frame-based orbital movement logic
+  useFrame(() => {
     if (!meshRef.current) return;
 
     const baseAngle = Math.atan2(originalPos.current.z, originalPos.current.x);
     const baseRadius = originalPos.current.length();
-    const scrollFactor = scroll.offset; // between 0 and 1
 
-    const dynamicRadius = baseRadius + scrollFactor * 10; // Change 2.5 as needed
+    const totalSections = 5;
+    const sectionHeight = 1 / totalSections;
+    const sectionStart = localSection * sectionHeight;
+    const sectionEnd = sectionStart + sectionHeight;
 
-    const angle = baseAngle + scrollFactor * Math.PI * 2;
+    let localScroll = (scroll.offset - sectionStart) / sectionHeight;
+    localScroll = THREE.MathUtils.clamp(localScroll, 0, 1);
+
+    const expansion = localSection % 2 === 0 ? localScroll : 1 - localScroll;
+    const dynamicRadius = baseRadius + expansion * 3;
+
+    const angle = baseAngle + scroll.offset * Math.PI * 2;
 
     const x = dynamicRadius * Math.cos(angle);
     const z = dynamicRadius * Math.sin(angle);
@@ -44,6 +67,7 @@ function Bubble({ position, delay = 0, radius = 0.5, size = 0.4 }) {
     meshRef.current.position.set(x, y, z);
   });
 
+  // 🌈 Hover effect
   useLayoutEffect(() => {
     if (!materialRef.current || !hovered) return;
 
