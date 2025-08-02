@@ -132,55 +132,53 @@ function Home() {
 
       {!ready && <LoaderOverlay />}
 
-      {ready && (
-        <>
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100vw",
-              height: "100vh",
-              zIndex: "0",
-            }}
+      <>
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            zIndex: "0",
+          }}
+        >
+          <Canvas
+            shadows
+            dpr={[1, 2]}
+            camera={{ fov: 50, position: [0, 0, 8] }}
           >
-            <Canvas
-              shadows
-              dpr={[1, 2]}
-              camera={{ fov: 50, position: [0, 0, 8] }}
-            >
-              <Preload all />
-              <Environment
-                files={"images/sky.jpg"}
-                background={false}
-                blur={0.8}
-                resolution={256}
+            <Preload all />
+            <Environment
+              files={"images/sky.jpg"}
+              background={false}
+              blur={0.8}
+              resolution={256}
+            />
+            <ScrollControls pages={10} damping={0.5}>
+              <MainScene skyRef={skyRef} />
+              <mesh ref={skyRef}>
+                <sphereGeometry args={[15, 32, 16]} />
+                <meshStandardMaterial map={texture} side={DoubleSide} />
+              </mesh>
+            </ScrollControls>
+            <EffectComposer>
+              <Bloom
+                intensity={1.2}
+                radius={0.6}
+                luminanceThreshold={0.2}
+                luminanceSmoothing={0.9}
               />
-              <ScrollControls pages={10} damping={0.5}>
-                <MainScene skyRef={skyRef} />
-                <mesh ref={skyRef}>
-                  <sphereGeometry args={[15, 32, 16]} />
-                  <meshStandardMaterial map={texture} side={DoubleSide} />
-                </mesh>
-              </ScrollControls>
-              <EffectComposer>
-                <Bloom
-                  intensity={1.2}
-                  radius={0.6}
-                  luminanceThreshold={0.2}
-                  luminanceSmoothing={0.9}
-                />
-              </EffectComposer>
-            </Canvas>
-          </Box>
+            </EffectComposer>
+          </Canvas>
+        </Box>
 
-          {playIntro && (
-            <div style={introOverlayStyle}>
-              <div style={glowTextStyle}>MorphAI</div>
-            </div>
-          )}
-        </>
-      )}
+        {playIntro && (
+          <div style={introOverlayStyle}>
+            <div style={glowTextStyle}>MorphAI</div>
+          </div>
+        )}
+      </>
     </>
   );
 }
