@@ -1,51 +1,134 @@
 import { Environment, ScrollControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Box } from "@mui/material";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import MainScene from "./MainScene";
 import { useLoader } from "@react-three/fiber";
 import { TextureLoader, DoubleSide } from "three";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 
+const introOverlayStyle = {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  backgroundColor: "#000",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 999,
+  opacity: 1,
+  animation: "fadeOut 1s ease-out forwards",
+  animationDelay: "4s",
+};
+
+const glowTextStyle = {
+  fontSize: "4rem",
+  color: "#fff",
+  textShadow: `
+    0 0 10px #ccc,
+    0 0 20px #ccc,
+    0 0 40px #ccc,
+    0 0 80px #ccc
+  `,
+  animation:
+    "fadeInText 4s ease-out forwards, pulseGlow 4s ease-in-out infinite",
+  animationDelay: "0.5s, 0.5s",
+  fontFamily: "Orbitron, sans-serif",
+  opacity: 0,
+};
+
+const styles = `
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    text-shadow: 
+      0 0 10px #ccc,
+      0 0 20px #ccc,
+      0 0 40px #ccc;
+  }
+  50% {
+    text-shadow: 
+      0 0 20px #ccc,
+      0 0 40px #ccc,
+      0 0 60px #ccc;
+  }
+}
+`;
+
 function Home() {
   const skyRef = useRef();
   const texture = useLoader(TextureLoader, "textures/2k_stars_milky_way.jpg");
 
+  const [playIntro, setPlayIntro] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setPlayIntro(false);
+    }, 5000);
+  }, [playIntro]);
+
   return (
-    <Box
-      sx={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        zIndex: "0",
-      }}
-    >
-      <Canvas shadows dpr={[1, 2]} camera={{ fov: 50, position: [0, 0, 8] }}>
-        <Environment
-          files={"images/sky.jpg"}
-          background={false}
-          blur={0.8}
-          resolution={256}
-        />
-        <ScrollControls pages={10} damping={0.5}>
-          <MainScene skyRef={skyRef} />
-          <mesh ref={skyRef}>
-            <sphereGeometry args={[15, 32, 16]} />
-            <meshStandardMaterial map={texture} side={DoubleSide} />
-          </mesh>
-        </ScrollControls>
-        <EffectComposer>
-          <Bloom
-            intensity={1.2}
-            radius={0.6}
-            luminanceThreshold={0.2}
-            luminanceSmoothing={0.9}
+    <>
+      <style>{styles}</style>
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          zIndex: "0",
+        }}
+      >
+        <Canvas shadows dpr={[1, 2]} camera={{ fov: 50, position: [0, 0, 8] }}>
+          <Environment
+            files={"images/sky.jpg"}
+            background={false}
+            blur={0.8}
+            resolution={256}
           />
-        </EffectComposer>
-      </Canvas>
-    </Box>
+          <ScrollControls pages={10} damping={0.5}>
+            <MainScene skyRef={skyRef} />
+            <mesh ref={skyRef}>
+              <sphereGeometry args={[15, 32, 16]} />
+              <meshStandardMaterial map={texture} side={DoubleSide} />
+            </mesh>
+          </ScrollControls>
+          <EffectComposer>
+            <Bloom
+              intensity={1.2}
+              radius={0.6}
+              luminanceThreshold={0.2}
+              luminanceSmoothing={0.9}
+            />
+          </EffectComposer>
+        </Canvas>
+      </Box>
+      {playIntro && (
+        <div style={introOverlayStyle}>
+          <div style={glowTextStyle}>MorphAI</div>
+        </div>
+      )}
+    </>
   );
 }
 

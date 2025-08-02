@@ -26,7 +26,6 @@ function SpeechToText({ open, handleClose, save }) {
     useSpeechRecognition();
 
   useEffect(() => {
-    console.log(open);
     if (open) startListening();
     else {
       setEditableTranscript("");

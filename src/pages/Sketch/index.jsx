@@ -74,12 +74,10 @@ function Sketch() {
     const interval = setInterval(async () => {
       try {
         const data = await TripoService.getTaskStatus(taskId);
-        console.log("Task status:", data.task.status);
         setTaskStatus(data.task.status);
 
         if (data.task.status === "success") {
           setModelUrls(data.task.output);
-          console.log("Final output:", data.output);
           clearInterval(interval);
         }
 
@@ -87,7 +85,6 @@ function Sketch() {
           clearInterval(interval);
         }
       } catch (err) {
-        console.error("Polling failed:", err);
         clearInterval(interval);
       }
     }, 4000); // poll every 4 seconds
@@ -103,11 +100,6 @@ function Sketch() {
 
       const history = [];
       const response = await models.text(history, imagePrompt, true);
-      console.log("text history", history);
-      console.log(
-        "text history",
-        history[1].parts[history[1].parts.length - 1]
-      );
       setImage(history[1].parts[history[1].parts.length - 1].inlineData);
     }
 
@@ -141,7 +133,6 @@ function Sketch() {
           const data = await TripoService.createTask(file);
           const taskId = data.task_id;
           setTaskId(taskId);
-          console.log("Model task submitted:", taskId);
         } catch (err) {
           console.error("Failed to create 3D task:", err);
         }
@@ -217,7 +208,6 @@ function Sketch() {
         ?.text?.trim();
 
       if (!modelReply) {
-        console.warn("Gemini did not return any object.");
         return;
       }
 

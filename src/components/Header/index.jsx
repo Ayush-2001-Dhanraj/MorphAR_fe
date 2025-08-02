@@ -8,6 +8,7 @@ import {
 import GradientTxt from "../GradientTxt";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useLocation, useNavigate } from "react-router";
+import EmailIcon from "@mui/icons-material/Email";
 
 const DrawerHeader = styled("Box")(({ theme }) => ({
   display: "flex",
@@ -27,18 +28,38 @@ function Header() {
 
   return (
     <DrawerHeader sx={{ justifyContent: "space-between", zIndex: 1 }}>
-      <Typography
-        variant="h6"
-        sx={{ cursor: "pointer" }}
-        onClick={handleNameClick}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 2,
+        }}
       >
-        <GradientTxt
-          txt="MorphAI"
-          extraStyles={{
-            fontWeight: "bold",
-          }}
-        />
-      </Typography>
+        <Typography
+          variant="h6"
+          sx={{ cursor: "pointer" }}
+          onClick={handleNameClick}
+        >
+          <GradientTxt
+            txt="MorphAI"
+            extraStyles={{
+              fontWeight: "bold",
+            }}
+          />
+        </Typography>
+        {location.pathname === "/" && (
+          <IconButton
+            sx={{ color: "var(--secondary-color)" }}
+            component="a"
+            href="mailto:dhanrajaayush123@gmail.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Typography color="var(--text-color)">Say Hi!!</Typography>
+          </IconButton>
+        )}
+      </Box>
       <Box
         sx={{
           display: "flex",

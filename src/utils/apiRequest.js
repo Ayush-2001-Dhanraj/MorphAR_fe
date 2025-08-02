@@ -17,7 +17,6 @@ const apiRequest = async (method, url, data, param) => {
     const response = await axios(config);
     return response.data;
   } catch (error) {
-    console.error("API Error:", error);
     return error.response?.data || { message: "Unknown error" };
   }
 };
