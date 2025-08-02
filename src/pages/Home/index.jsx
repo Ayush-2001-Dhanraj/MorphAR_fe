@@ -5,7 +5,7 @@ import {
   useProgress,
 } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { Box } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import MainScene from "./MainScene";
 import { useLoader } from "@react-three/fiber";
@@ -100,7 +100,13 @@ function LoaderOverlay() {
         fontSize: "1.5rem",
       }}
     >
-      Loading {Math.floor(progress)}%
+      <CircularProgress color="var(--text-color)" />
+
+      <Box sx={{ position: "absolute", bottom: "10px" }}>
+        <Typography sx={{ color: "var(--text-color)" }}>
+          Hang on!! Good things take time ❤
+        </Typography>
+      </Box>
     </Box>
   );
 }
@@ -118,9 +124,9 @@ function Home() {
   useEffect(() => {
     if (progress === 100 && !hasLoadedOnce.current) {
       hasLoadedOnce.current = true;
+      setPlayIntro(true);
       setTimeout(() => {
         setReady(true);
-        setPlayIntro(true);
         setTimeout(() => setPlayIntro(false), 5000);
       }, 300);
     }
@@ -132,53 +138,47 @@ function Home() {
 
       {!ready && <LoaderOverlay />}
 
-      <>
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            zIndex: "0",
-          }}
-        >
-          <Canvas
-            shadows
-            dpr={[1, 2]}
-            camera={{ fov: 50, position: [0, 0, 8] }}
-          >
-            <Preload all />
-            <Environment
-              files={"images/sky.jpg"}
-              background={false}
-              blur={0.8}
-              resolution={256}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          zIndex: "0",
+        }}
+      >
+        <Canvas shadows dpr={[1, 2]} camera={{ fov: 50, position: [0, 0, 8] }}>
+          <Preload all />
+          <Environment
+            files={"images/sky.jpg"}
+            background={false}
+            blur={0.8}
+            resolution={256}
+          />
+          <ScrollControls pages={10} damping={0.5}>
+            <MainScene skyRef={skyRef} />
+            <mesh ref={skyRef}>
+              <sphereGeometry args={[15, 32, 16]} />
+              <meshStandardMaterial map={texture} side={DoubleSide} />
+            </mesh>
+          </ScrollControls>
+          <EffectComposer>
+            <Bloom
+              intensity={1.2}
+              radius={0.6}
+              luminanceThreshold={0.2}
+              luminanceSmoothing={0.9}
             />
-            <ScrollControls pages={10} damping={0.5}>
-              <MainScene skyRef={skyRef} />
-              <mesh ref={skyRef}>
-                <sphereGeometry args={[15, 32, 16]} />
-                <meshStandardMaterial map={texture} side={DoubleSide} />
-              </mesh>
-            </ScrollControls>
-            <EffectComposer>
-              <Bloom
-                intensity={1.2}
-                radius={0.6}
-                luminanceThreshold={0.2}
-                luminanceSmoothing={0.9}
-              />
-            </EffectComposer>
-          </Canvas>
-        </Box>
+          </EffectComposer>
+        </Canvas>
+      </Box>
 
-        {playIntro && (
-          <div style={introOverlayStyle}>
-            <div style={glowTextStyle}>MorphAI</div>
-          </div>
-        )}
-      </>
+      {playIntro && ready && (
+        <div style={introOverlayStyle}>
+          <div style={glowTextStyle}>MorphAI</div>
+        </div>
+      )}
     </>
   );
 }
