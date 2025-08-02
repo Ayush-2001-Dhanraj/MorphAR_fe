@@ -159,10 +159,6 @@ function MainScene({ skyRef }) {
   }, []);
 
   useEffect(() => {
-    console.log("section", section);
-  }, [section]);
-
-  useEffect(() => {
     if (gltf.scene) {
       const targetMesh = gltf.scene.children[0];
       if (targetMesh) {
