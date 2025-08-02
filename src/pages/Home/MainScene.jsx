@@ -38,7 +38,7 @@ function AutoMoveObject({
     }
 
     if (section === 1 || section === 2) {
-      setHelperText("Let's start with the vase");
+      setHelperText("Vase Creation");
 
       let value = scroll.offset; // Example input
       let oldMin = 0.2;
@@ -88,6 +88,14 @@ function AutoMoveObject({
       animateY(sectionRefs.section1C, part >= 2);
     }
 
+    if (section === 3) {
+      setHelperText("A vase needs flowers and a Stand");
+    }
+
+    if (section === 4 || section === 5) {
+      setHelperText("Putting it all Together");
+    }
+
     if (taskSectionRef1.current && section === 0) {
       taskSectionRef1.current.position.y = scroll.offset * 13.8 - 2;
     }
@@ -127,7 +135,7 @@ function MainScene({ skyRef }) {
     const bubbles = [];
     const count = 25;
     for (let i = 0; i < count; i++) {
-      const radius = THREE.MathUtils.randFloat(1, 1.5); // Increased radius
+      const radius = THREE.MathUtils.randFloat(0.5, 1.2); // Increased radius
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.random() * Math.PI;
 

@@ -318,7 +318,6 @@ function SideBar() {
             Recent
           </Typography>
           {allChats.map((chat) => {
-            console.log(chat);
             const heading = chat.chat_history[0].parts[0].text;
             return (
               <Typography
